@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldCheck, Heart, Users, Award, ArrowRight } from "lucide-react";
+import { ShieldCheck, BadgeCheck, Users, Award, ArrowRight } from "lucide-react";
 import office1 from "@/assets/office-1.jpg";
 import office2 from "@/assets/office-2.jpg";
 import office3 from "@/assets/office-3.jpg";
@@ -51,7 +51,7 @@ function AboutPage() {
         <div className="mt-12 grid gap-6 md:grid-cols-4">
           {[
             { icon: ShieldCheck, t: "Trust", d: "Verified Yango partner with a real office." },
-            { icon: Heart, t: "Free Always", d: "Zero registration fees. Forever." },
+            { icon: BadgeCheck, t: "Always Free", d: "Zero registration fees. Forever." },
             { icon: Users, t: "Local Team", d: "Pakistani support, in your language." },
             { icon: Award, t: "Driver-First", d: "Every decision starts with driver success." },
           ].map((v, i) => (

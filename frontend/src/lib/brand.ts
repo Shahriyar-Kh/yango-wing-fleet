@@ -18,7 +18,7 @@ export const CITIES = [
   { slug: "karachi", name: "Karachi", blurb: "Pakistan's commercial capital" },
   { slug: "islamabad", name: "Islamabad", blurb: "The capital city" },
   { slug: "rawalpindi", name: "Rawalpindi", blurb: "Twin city hub" },
-  { slug: "faisalabad", name: "Faisalabad", blurb: "Industrial heartland" },
+  { slug: "faisalabad", name: "Faisalabad", blurb: "Industrial hub" },
   { slug: "multan", name: "Multan", blurb: "City of saints" },
 ] as const;
 
