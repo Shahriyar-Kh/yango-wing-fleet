@@ -11,7 +11,15 @@ export const stagger: Variants = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-export function Reveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
   return (
     <motion.div
       initial="hidden"
@@ -42,7 +50,9 @@ export function SectionTitle({
   return (
     <Reveal className={center ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
       {eyebrow && (
-        <div className={`mb-3 inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-gold ${center ? "" : ""}`}>
+        <div
+          className={`mb-3 inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-gold ${center ? "" : ""}`}
+        >
           {eyebrow}
         </div>
       )}

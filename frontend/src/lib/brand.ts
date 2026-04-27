@@ -10,7 +10,7 @@ export const BRAND = {
 };
 
 export const WHATSAPP_URL = `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(
-  "Assalam-o-Alaikum, I want to register as a Yango rider with Yango Wing Fleet."
+  "Assalam-o-Alaikum, I want to register as a Yango rider with Yango Wing Fleet.",
 )}`;
 
 export const CITIES = [

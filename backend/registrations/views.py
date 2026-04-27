@@ -3,11 +3,12 @@ import csv
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.views import APIView
 
 from core.throttles import RegistrationSubmitRateThrottle
-from core.utils.responses import api_success
+from core.utils.responses import api_error, api_success
 from registrations.models import RegistrationStatus, RegistrationSubmission
 from registrations.serializers import (
 	RegistrationSubmissionAdminSerializer,
@@ -22,7 +23,10 @@ class PublicRegistrationCreateAPIView(APIView):
 
 	def post(self, request):
 		serializer = RegistrationSubmissionCreateSerializer(data=request.data)
-		serializer.is_valid(raise_exception=True)
+		try:
+			serializer.is_valid(raise_exception=True)
+		except ValidationError as exc:
+			return api_error(message="Validation failed", errors=exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
 		registration = serializer.save(
 			source_ip=self._get_client_ip(request),
 			user_agent=request.META.get("HTTP_USER_AGENT", "")[:1000],

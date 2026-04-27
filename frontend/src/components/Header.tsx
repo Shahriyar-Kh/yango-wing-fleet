@@ -20,10 +20,16 @@ export function Header() {
     <header className="sticky top-0 z-50 glass-strong border-b border-border/60">
       <div className="container-x flex h-16 items-center justify-between md:h-20">
         <Link to="/" className="flex items-center gap-3" aria-label="Yango Wing Fleet home">
-          <img src={logo} alt="Yango Wing Fleet logo" className="h-10 w-10 md:h-12 md:w-12 rounded-full" />
+          <img
+            src={logo}
+            alt="Yango Wing Fleet logo"
+            className="h-10 w-10 md:h-12 md:w-12 rounded-full"
+          />
           <div className="hidden sm:block leading-tight">
             <div className="text-sm font-bold tracking-wider text-foreground">YANGO</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-gradient-gold font-semibold">Wing Fleet</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-gradient-gold font-semibold">
+              Wing Fleet
+            </div>
           </div>
         </Link>
 

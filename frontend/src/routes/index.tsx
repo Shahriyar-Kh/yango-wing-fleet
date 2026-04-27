@@ -35,7 +35,6 @@ import { CITIES, SERVICES, WHATSAPP_URL, BRAND } from "@/lib/brand";
 import { Reveal, SectionTitle } from "@/components/ui-kit";
 import { HeroOfferCards } from "@/components/HeroOfferCards";
 import { EarningsHighlight } from "@/components/EarningsHighlight";
-import { BonusSection } from "@/components/BonusSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -57,6 +56,7 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
+  staleTime: 60_000,
   component: HomePage,
 });
 
@@ -75,6 +75,8 @@ function HomePage() {
             className="h-full w-full object-cover opacity-25"
             width={1920}
             height={1080}
+            loading="eager"
+            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-linear-to-b from-background/80 via-background/85 to-background" />
           <div className="absolute inset-0 bg-gradient-radial" />
@@ -335,9 +337,6 @@ function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── BONUS / GOALS INFOGRAPHIC ─────────────────────────────────────── */}
-      <BonusSection />
 
       {/* ── WEEKLY BONUS TIERS (simple highlight cards) ───────────────────── */}
       <section className="container-x py-12 md:py-20">

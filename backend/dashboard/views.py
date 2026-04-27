@@ -54,7 +54,7 @@ class DashboardSummaryAPIView(APIView):
 					"weekly_registrations": weekly_registrations,
 					"monthly_registrations": monthly_registrations,
 					"active_offers": active_offer_count,
-					"active_city_bonus_records": city_bonus_records,
+					"active_trip_bonus_records": city_bonus_records,
 					"open_inquiries": open_inquiries,
 				},
 				"city_counts": city_counts,

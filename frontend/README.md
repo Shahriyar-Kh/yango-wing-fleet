@@ -47,20 +47,20 @@ The public experience includes:
 
 ## Main Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Homepage with hero, stats, services, process, cities, bonuses, support, and FAQ preview |
-| `/services` | Service overview for bike, car, and rickshaw registration |
-| `/how-it-works` | Four-step onboarding explanation |
-| `/registration` | Registration form for new drivers |
-| `/about` | Brand story, office presence, and value highlights |
-| `/contact` | Contact form plus phone, WhatsApp, email, and office details |
-| `/support` | 24/7 support channels and common issue categories |
-| `/faq` | Frequently asked questions |
-| `/cities/$city` | City-specific onboarding landing pages |
-| `/privacy` | Privacy policy |
-| `/terms` | Terms of service |
-| `/thank-you` | Confirmation page after registration submission |
+| Route           | Purpose                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------- |
+| `/`             | Homepage with hero, stats, services, process, cities, bonuses, support, and FAQ preview |
+| `/services`     | Service overview for bike, car, and rickshaw registration                               |
+| `/how-it-works` | Four-step onboarding explanation                                                        |
+| `/registration` | Registration form for new drivers                                                       |
+| `/about`        | Brand story, office presence, and value highlights                                      |
+| `/contact`      | Contact form plus phone, WhatsApp, email, and office details                            |
+| `/support`      | 24/7 support channels and common issue categories                                       |
+| `/faq`          | Frequently asked questions                                                              |
+| `/cities/$city` | City-specific onboarding landing pages                                                  |
+| `/privacy`      | Privacy policy                                                                          |
+| `/terms`        | Terms of service                                                                        |
+| `/thank-you`    | Confirmation page after registration submission                                         |
 
 ## Page Details
 

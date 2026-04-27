@@ -10,27 +10,39 @@ export const Route = createFileRoute("/cities/$city")({
     return { city };
   },
   head: ({ loaderData }) => {
-    const name = loaderData?.city.name ?? "City";
+    const name = loaderData?.city?.name ?? "City";
     return {
       meta: [
         { title: `Yango Driver Registration in ${name} — Free Onboarding | Yango Wing Fleet` },
-        { name: "description", content: `Become a Yango driver in ${name}. Free bike, car & rickshaw registration with local support from Yango Wing Fleet.` },
+        {
+          name: "description",
+          content: `Become a Yango driver in ${name}. Free bike, car & rickshaw registration with local support from Yango Wing Fleet.`,
+        },
         { property: "og:title", content: `Yango Registration in ${name}` },
-        { property: "og:description", content: `Free Yango driver onboarding in ${name} with 24/7 local support.` },
+        {
+          property: "og:description",
+          content: `Free Yango driver onboarding in ${name} with 24/7 local support.`,
+        },
       ],
     };
   },
+  staleTime: 60_000,
+  preload: true,
   notFoundComponent: () => (
     <div className="container-x py-32 text-center">
       <h1 className="text-3xl font-bold">City not found</h1>
-      <Link to="/" className="mt-4 inline-block text-gold underline">Go home</Link>
+      <Link to="/" className="mt-4 inline-block text-gold underline">
+        Go home
+      </Link>
     </div>
   ),
   component: CityPage,
 });
 
 function CityPage() {
-  const { city } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  if (!data) return null;
+  const { city } = data;
   return (
     <>
       <section className="relative overflow-hidden">
@@ -43,18 +55,38 @@ function CityPage() {
             Yango Driver Registration in <span className="text-gradient-primary">{city.name}</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground">
-            {city.blurb}. Onboard your bike, car or rickshaw with Yango through Wing Fleet — free, fast, and supported by a local team.
+            {city.blurb}. Onboard your bike, car or rickshaw with Yango through Wing Fleet — free,
+            fast, and supported by a local team.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/registration" className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow hover:scale-105 transition-transform">Register in {city.name} <ArrowRight className="h-4 w-4" /></Link>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full glass-strong px-6 py-3.5 text-sm font-semibold"><MessageCircle className="h-4 w-4 text-gold" /> WhatsApp</a>
+            <Link
+              to="/registration"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-glow hover:scale-105 transition-transform"
+            >
+              Register in {city.name} <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full glass-strong px-6 py-3.5 text-sm font-semibold"
+            >
+              <MessageCircle className="h-4 w-4 text-gold" /> WhatsApp
+            </a>
           </div>
         </div>
       </section>
 
       <section className="container-x py-16">
-        <SectionTitle eyebrow="Vehicle Types" title={<>Supported in <span className="text-gradient-gold">{city.name}</span></>} />
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <SectionTitle
+          eyebrow="Vehicle Types"
+          title={
+            <>
+              Supported in <span className="text-gradient-gold">{city?.name}</span>
+            </>
+          }
+        />
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
           {[
             { icon: Bike, t: "Bike", d: `Fastest growing category in ${city.name}.` },
             { icon: Car, t: "Car", d: `Premium ride demand across ${city.name}.` },
@@ -72,35 +104,29 @@ function CityPage() {
       </section>
 
       <section className="container-x py-16">
-        <SectionTitle eyebrow="Bonuses" title={<>{city.name} weekly <span className="text-gradient-primary">earnings goals</span></>} subtitle="Sample tiers — actual figures vary by Yango campaigns in your city." />
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {[
-            { tier: "Starter", bonus: "PKR 2,500", rides: 40 },
-            { tier: "Pro", bonus: "PKR 7,000", rides: 100 },
-            { tier: "Elite", bonus: "PKR 13,000", rides: 180 },
-          ].map((b, i) => (
-            <Reveal key={b.tier} delay={i * 0.08}>
-              <div className="glass rounded-2xl p-6">
-                <Trophy className="h-8 w-8 text-gold" />
-                <div className="mt-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{b.tier}</div>
-                <div className="mt-1 text-3xl font-bold text-gradient-gold">{b.bonus}</div>
-                <p className="mt-2 text-sm text-muted-foreground">{b.rides}+ rides / week in {city.name}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="container-x py-16">
         <Reveal>
           <div className="rounded-3xl glass-strong p-8 md:p-12 grid gap-8 md:grid-cols-2 md:items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold">Need help in {city.name}?</h2>
-              <p className="mt-3 text-muted-foreground">Local support team available 24/7 in Urdu and English.</p>
+              <p className="mt-3 text-muted-foreground">
+                Local support team available 24/7 in Urdu and English.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
-              <a href={`tel:${BRAND.phones[0].replace(/-/g, "")}`} className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow"><Phone className="h-4 w-4" /> Call Us</a>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-sm font-semibold"><MessageCircle className="h-4 w-4 text-gold" /> WhatsApp</a>
+              <a
+                href={`tel:${BRAND.phones[0].replace(/-/g, "")}`}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow"
+              >
+                <Phone className="h-4 w-4" /> Call Us
+              </a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full glass px-5 py-3 text-sm font-semibold"
+              >
+                <MessageCircle className="h-4 w-4 text-gold" /> WhatsApp
+              </a>
             </div>
           </div>
         </Reveal>
@@ -110,7 +136,12 @@ function CityPage() {
         <h2 className="text-2xl font-bold">Other cities we serve</h2>
         <div className="mt-6 flex flex-wrap gap-2">
           {CITIES.filter((c) => c.slug !== city.slug).map((c) => (
-            <Link key={c.slug} to="/cities/$city" params={{ city: c.slug }} className="rounded-full glass px-4 py-2 text-sm hover:border-gold transition-colors">
+            <Link
+              key={c.slug}
+              to="/cities/$city"
+              params={{ city: c.slug }}
+              className="rounded-full glass px-4 py-2 text-sm hover:border-gold transition-colors"
+            >
               Yango Registration {c.name}
             </Link>
           ))}

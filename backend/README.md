@@ -34,8 +34,6 @@ Production-ready Django + DRF backend for dynamic public content, registration i
 ## Private Admin Endpoints (JWT + admin user required)
 - Content CRUD:
   - `/api/admin/content/offers/`
-  - `/api/admin/content/promo-banners/`
-  - `/api/admin/content/city-goals/`
   - `/api/admin/content/trip-bonuses/`
 - Registrations:
   - `/api/admin/registrations/`

@@ -13,21 +13,6 @@ FALLBACK_OFFERS = [
     },
 ]
 
-FALLBACK_CITY_GOALS = [
-    {
-        "city": "Lahore",
-        "vehicle_type": "bike",
-        "trip_target": 50,
-        "notes": "Sample fallback goal",
-    },
-    {
-        "city": "Karachi",
-        "vehicle_type": "car",
-        "trip_target": 60,
-        "notes": "Sample fallback goal",
-    },
-]
-
 FALLBACK_TRIP_BONUSES = [
     {
         "city": "Lahore",
