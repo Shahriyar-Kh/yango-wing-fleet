@@ -23,7 +23,6 @@ async function rawFetch(url: string, options: RequestInit = {}): Promise<Respons
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "Cache-Control": "no-cache",
       ...(options.headers ?? {}),
     },
   });
