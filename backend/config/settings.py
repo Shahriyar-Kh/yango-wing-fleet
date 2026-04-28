@@ -163,6 +163,17 @@ REST_FRAMEWORK = {
     }
 }
 
+# Ensure JWT tokens are recognised by DRF and avoid CSRF enforcement for JWT auth
+REST_FRAMEWORK.setdefault('DEFAULT_AUTHENTICATION_CLASSES', [
+    'rest_framework_simplejwt.authentication.JWTAuthentication',
+    'rest_framework.authentication.SessionAuthentication',
+])
+
+# Keep permissions opt-in per-view; default to allowing unauthenticated read where needed
+REST_FRAMEWORK.setdefault('DEFAULT_PERMISSION_CLASSES', [
+    'rest_framework.permissions.AllowAny',
+])
+
 # ------------------------------------------------------------------------------
 # JWT
 # ------------------------------------------------------------------------------
@@ -226,3 +237,4 @@ LOGGING = {
         "level": "INFO",
     },
 }
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")

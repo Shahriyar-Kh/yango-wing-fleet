@@ -136,17 +136,21 @@ function usePolling<T>(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const lastRef = useRef<number>(0);
+  const fetcherRef = useRef(fetcher);
+  
+  // Keep fetcherRef current without re-triggering effects
+  useEffect(() => { fetcherRef.current = fetcher; });
 
   const fetch = useCallback(async () => {
     const now = Date.now();
     if (now - lastRef.current < 1000) return;
     lastRef.current = now;
     setError(null);
-    const result = await fetcher();
+    const result = await fetcherRef.current();
     setData(result.data);
     if (result.error) setError(result.error);
     setLoading(false);
-  }, []); // eslint-disable-line
+  }, []); // stable reference, fetcherRef handles currency
 
   useEffect(() => {
     fetch();
@@ -156,7 +160,6 @@ function usePolling<T>(
 
   return { data, loading, error, refetch: fetch };
 }
-
 // ─── Mini components ──────────────────────────────────────────────────────────
 
 function Skeleton({ className = "" }: { className?: string }) {
@@ -719,10 +722,7 @@ function BonusModal({
 
 // ─── Overview / Analytics ─────────────────────────────────────────────────────
 function OverviewSection({
-  summary,
-  trends,
-  distributions,
-  loading,
+  summary, trends, distributions, loading,
 }: {
   summary: DashboardSummary | null;
   trends: DashboardTrends | null;
@@ -730,20 +730,23 @@ function OverviewSection({
   loading: boolean;
 }) {
   const [trendPeriod, setTrendPeriod] = useState<"daily" | "weekly" | "monthly">("daily");
-  const {
-    data: trendData,
-    loading: trendLoading,
-    refetch: refetchTrends,
-  } = usePolling(
-    () => adminApi.getDashboardTrends(trendPeriod, trendPeriod === "daily" ? 14 : 12),
-    60000,
-  );
+  const [localTrends, setLocalTrends] = useState<DashboardTrends | null>(trends);
+  const [trendLoading, setTrendLoading] = useState(false);
 
-  useEffect(() => {
-    refetchTrends();
-  }, [trendPeriod]); // eslint-disable-line
+  // Use initial prop, then fetch when period changes
+  useEffect(() => { setLocalTrends(trends); }, [trends]);
 
-  const totals = summary?.totals;
+  const refetchTrends = useCallback(async () => {
+    setTrendLoading(true);
+    const result = await adminApi.getDashboardTrends(
+      trendPeriod,
+      trendPeriod === "daily" ? 14 : 12
+    );
+    if (result.data) setLocalTrends(result.data);
+    setTrendLoading(false);
+  }, [trendPeriod]);
+
+  useEffect(() => { refetchTrends(); }, [refetchTrends]);
 
   return (
     <div className="space-y-6">

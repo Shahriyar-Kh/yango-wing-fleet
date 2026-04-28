@@ -22,6 +22,7 @@ async function rawFetch(url: string, options: RequestInit = {}): Promise<Respons
     ...options,
     headers: {
       "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
       ...(options.headers ?? {}),
     },
   });
@@ -86,13 +87,14 @@ async function parseResponse<T>(res: Response): Promise<ApiResponse<T>> {
     return { data: null, error: res.ok ? null : "Unexpected response", status: res.status };
   }
 
-  if (res.ok) {
-    return {
-      data: (json.data ?? json) as T,
-      error: null,
-      status: res.status,
-    };
-  }
+// client.ts — current code (BUGGY)
+if (res.ok) {
+  return {
+    data: (json.data ?? json) as T,  // ← This is correct
+    error: null,
+    status: res.status,
+  };
+}
 
   const fieldErrors = Object.fromEntries(
     Object.entries(json).filter(
