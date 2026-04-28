@@ -1,263 +1,167 @@
 # Yango Wing Fleet Frontend
 
-Yango Wing Fleet is a React frontend for a Yango driver registration and support website focused on Pakistan. The site is built with TanStack Start, TanStack Router, Vite, TypeScript, Tailwind CSS v4, and a set of reusable UI primitives for a polished marketing and onboarding experience.
+The frontend is the customer-facing and staff-facing React application for Yango Wing Fleet. It presents the public onboarding experience, support content, and the private admin dashboard that connects directly to the Django REST API.
 
-This frontend presents the business as a real, local, free registration partner for Yango drivers. It includes a homepage, service pages, city-specific landing pages, registration and contact forms, support content, legal pages, and a thank-you flow after registration submission.
+## Frontend Overview
 
-## Website Overview
+This app is responsible for:
 
-The website is designed around a simple goal: help bike, car, and rickshaw drivers register for Yango quickly and for free.
+- Public marketing and onboarding pages
+- Online rider registration and contact flows
+- Admin login and private dashboard access
+- Live API-backed analytics and content management
 
-The public experience includes:
+It is deployed on Vercel and communicates with the backend on Render through HTTPS API requests.
 
-- Strong hero messaging on the homepage
-- Clear service explanations for bike, car, and rickshaw onboarding
-- City landing pages for local SEO and local trust
-- A step-by-step onboarding flow
-- Registration and contact forms
-- 24/7 support details through WhatsApp and phone
-- FAQ, privacy, terms, and support pages
-- A post-submission thank-you page
-
-## Tech Stack
-
-- React 19
-- TanStack Start
-- TanStack Router
-- Vite
-- TypeScript
-- Tailwind CSS v4
-- Framer Motion
-- Lucide React icons
-- React Hook Form
-- Zod validation
-- Radix UI primitives
-
-## Key Features
-
-- Fully responsive marketing site
-- Animated hero, cards, and section reveals
-- Local city pages for six supported cities
-- Vehicle-specific onboarding content
-- Client-side registration form validation
-- Client-side contact form validation
-- Support-focused CTA paths to WhatsApp and phone calls
-- SEO metadata on each route
-- SSR-ready shell through TanStack Start
-
-## Main Routes
-
-| Route           | Purpose                                                                                 |
-| --------------- | --------------------------------------------------------------------------------------- |
-| `/`             | Homepage with hero, stats, services, process, cities, bonuses, support, and FAQ preview |
-| `/services`     | Service overview for bike, car, and rickshaw registration                               |
-| `/how-it-works` | Four-step onboarding explanation                                                        |
-| `/registration` | Registration form for new drivers                                                       |
-| `/about`        | Brand story, office presence, and value highlights                                      |
-| `/contact`      | Contact form plus phone, WhatsApp, email, and office details                            |
-| `/support`      | 24/7 support channels and common issue categories                                       |
-| `/faq`          | Frequently asked questions                                                              |
-| `/cities/$city` | City-specific onboarding landing pages                                                  |
-| `/privacy`      | Privacy policy                                                                          |
-| `/terms`        | Terms of service                                                                        |
-| `/thank-you`    | Confirmation page after registration submission                                         |
-
-## Page Details
-
-### Homepage
-
-The homepage introduces the brand and the offer quickly. It includes:
-
-- A hero section with a strong registration message
-- Call-to-action buttons for registration and WhatsApp
-- Driver stats such as onboarded drivers, city coverage, and support hours
-- A promotional intro media section
-- Office/trust section with real-location messaging
-- Services cards for bike, car, and truck/rickshaw categories
-- A four-step onboarding process
-- City cards for all supported cities
-- Weekly earnings and bonus example cards
-- Support block with call and WhatsApp access
-- FAQ preview questions
-
-### Services Page
-
-The services page explains the registration flow for:
-
-- Bike registration
-- Car registration
-- Rickshaw registration
-
-Each service card includes:
-
-- Intro text
-- Required details
-- Registration steps
-- Registration notes
-
-### How It Works
-
-This page shows the onboarding journey in four steps:
-
-1. Fill the form
-2. Submit details
-3. Review and contact
-4. Complete onboarding
-
-### Registration Page
-
-The registration form collects:
-
-- Full name
-- CNIC
-- Phone number
-- City
-- Vehicle type
-- Vehicle make/model
-- Vehicle year
-- Optional notes
-
-Validation is handled with Zod and React Hook Form.
-
-Current behavior:
-
-- The form validates locally in the browser
-- On success, it waits briefly and redirects to the thank-you page
-- No backend API is wired into this frontend yet
-
-### About Page
-
-The about page presents:
-
-- The company mission
-- Real office messaging
-- Office imagery
-- Brand values such as trust, always free, local team, and driver-first service
-- A final registration CTA
-
-### Contact Page
-
-The contact page provides:
-
-- Phone contact
-- WhatsApp contact
-- Email contact
-- Office location
-- Social buttons
-- A contact form for general questions
-
-Current behavior:
-
-- The form validates locally
-- On submit, it simulates a successful send and shows a confirmation state
-- No mail service or API endpoint is connected yet
-
-### Support Page
-
-The support page highlights:
-
-- WhatsApp support
-- Phone support
-- Office visits
-- Common issue categories such as onboarding help, app issues, map issues, and account issues
-
-### FAQ Page
-
-The FAQ page answers common questions about:
-
-- Free registration
-- Registration timing
-- Supported cities
-- Supported vehicle types
-- Required documents
-- Document upload flow
-- Bonus logic
-- Vehicle changes
-- Account blocking help
-- Office location
-
-### City Pages
-
-The city route uses dynamic slugs for:
-
-- Lahore
-- Karachi
-- Islamabad
-- Rawalpindi
-- Faisalabad
-- Multan
-
-Each city page includes:
-
-- Localized hero copy
-- Supported vehicle types
-- Bonus examples
-- Local support CTA
-- Links to other cities
-
-### Legal Pages
-
-- Privacy policy
-- Terms of service
-
-These pages explain how user data is handled and clarify that Yango Wing Fleet is an independent registration partner.
-
-### Thank You Page
-
-After successful registration, users see a confirmation page with:
-
-- Success messaging
-- WhatsApp CTA
-- Home navigation CTA
-
-## Global Layout
-
-The app uses a shared root layout that includes:
-
-- `Header`
-- Route outlet
-- `Footer`
-- Floating WhatsApp action button
-
-The root route also sets document metadata, viewport settings, and global stylesheet loading.
-
-## Header
-
-The header includes:
-
-- Brand logo and wordmark
-- Desktop navigation
-- Mobile menu toggle
-- WhatsApp CTA
-- Free registration CTA
-
-Navigation links:
+## Pages
 
 - Home
 - Services
 - How It Works
+- Registration
 - About
+- Contact
 - Support
 - FAQ
-- Contact
+- City landing pages
+- Legal pages
+- Admin login
+- Admin dashboard
 
-## Footer
+## UI/UX Features
 
-The footer includes:
+- Responsive, mobile-first layout
+- Animated sections and smooth transitions
+- Infographic-style cards and KPI blocks
+- Clean typography and clear visual hierarchy
+- Public pages optimized for trust and conversion
+- Admin interface optimized for daily operations
 
-- Brand summary
-- Quick links
-- City links
-- Phone numbers
-- WhatsApp support link
-- Email address
-- Office address
+## State Management
 
-## Brand Data
+- Auth context manages admin login state
+- API service modules centralize requests
+- Token storage keeps access and refresh tokens available across page reloads
+- Dashboard views use polling for near-real-time updates
 
-Shared brand values and contact information live in `src/lib/brand.ts`.
+## Routing
 
-Current data includes:
+TanStack Router handles all application routes.
+
+- Public pages are accessible without authentication
+- `/admin/login` is the authentication entry point
+- `/admin/dashboard` is protected and redirects unauthenticated users back to login
+- `/admin` redirects to the correct admin destination based on auth state
+
+## API Integration
+
+The frontend uses a shared API client for public and protected requests.
+
+- Base URL is controlled by `VITE_API_BASE_URL`
+- Login posts to `POST /api/auth/token/`
+- Protected dashboard requests send `Authorization: Bearer <token>`
+- Error messages are surfaced from the backend when available
+- The client avoids leaking browser-specific errors into user-facing flows
+
+Example environment file:
+
+```env
+VITE_API_BASE_URL=https://yango-wing-fleet.onrender.com
+```
+
+## Dashboard Features
+
+The custom dashboard includes:
+
+- Analytics summary cards
+- Daily, weekly, and monthly trend views
+- Distribution charts for registrations and inquiries
+- Registration management
+- Inquiry management
+- Offer CRUD screens
+- Trip bonus CRUD screens
+- CSV export actions
+- Polling-based refresh for live-feeling updates
+
+## Pages in Detail
+
+### Home
+
+The homepage explains the value proposition, supported vehicles, city coverage, and support channels.
+
+### Services
+
+The services page presents Bike, Car, and Rickshaw onboarding details.
+
+### Registration
+
+The registration page captures rider details and submits them to the backend API.
+
+### Contact
+
+The contact page provides a branded support and inquiry flow.
+
+### Admin Login
+
+The admin login page authenticates staff with username and password.
+
+### Admin Dashboard
+
+The dashboard shows real-time-like stats, content controls, and admin tools backed by the database.
+
+## Build and Local Development
+
+### Install dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+### Start the dev server
+
+```bash
+npm run dev
+```
+
+### Build for production
+
+```bash
+npm run build
+```
+
+### Environment variables
+
+Create a `.env` file in `frontend/`:
+
+```env
+VITE_API_BASE_URL=https://yango-wing-fleet.onrender.com
+```
+
+## Deployment
+
+- Hosted on Vercel
+- Build command: `npm run build`
+- Output directory: `dist`
+- SPA routing is handled through Vercel rewrites
+- The deployed site must be configured with the production backend API base URL
+
+## Project Notes
+
+- The frontend is designed to work with the backend JWT auth flow
+- Admin dashboard data is loaded from protected API endpoints
+- Public pages can consume backend-driven dynamic content when needed
+- The app uses Tailwind CSS for styling and Recharts for dashboard visuals
+
+## Relevant Files
+
+- `src/lib/api/config.ts` — API base URL and endpoint constants
+- `src/lib/api/client.ts` — Shared fetch layer and error handling
+- `src/contexts/AuthContext.tsx` — Authentication state management
+- `src/routes/admin/login.tsx` — Admin login screen
+- `src/routes/admin/dashboard.tsx` — Admin control center
+- `src/hooks/useDashboard.ts` — Dashboard data hooks
+
 
 - Brand name: Yango Wing Fleet
 - Short name: YWF
