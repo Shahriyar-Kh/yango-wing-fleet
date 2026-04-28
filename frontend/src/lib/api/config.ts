@@ -3,6 +3,7 @@
  */
 
 const LOCALHOST_BASE_URLS = new Set(["http://localhost:8000", "http://127.0.0.1:8000"]);
+const PRODUCTION_API_BASE_URL = "https://yango-wing-fleet.onrender.com";
 
 function normalizeBaseUrl(value: string | undefined): string {
   return value?.trim().replace(/\/+$/, "") ?? "";
@@ -21,21 +22,11 @@ export const API_BASE_URL =
     ? configuredApiBaseUrl || "http://localhost:8000"
     : configuredApiBaseUrl && !isLocalhostBaseUrl(configuredApiBaseUrl)
       ? configuredApiBaseUrl
-      : "";
+      : PRODUCTION_API_BASE_URL;
 
 export const API_BASE_URL_SOURCE = configuredApiBaseUrl;
 
 export function getApiBaseUrlError(): string | null {
-  if (!import.meta.env.PROD) return null;
-
-  if (!configuredApiBaseUrl) {
-    return "Production API base URL is not configured. Set VITE_API_BASE_URL to the Render backend origin.";
-  }
-
-  if (isLocalhostBaseUrl(configuredApiBaseUrl)) {
-    return "Production API base URL is still pointing to localhost. Update VITE_API_BASE_URL to the Render backend origin.";
-  }
-
   return null;
 }
 

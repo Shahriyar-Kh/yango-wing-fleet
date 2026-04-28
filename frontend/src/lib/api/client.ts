@@ -5,7 +5,7 @@
  * - Wraps all responses in a consistent { data, error } shape.
  */
 
-import { buildApiUrl, ENDPOINTS, getApiBaseUrlError, API_BASE_URL_SOURCE } from "./config";
+import { API_BASE_URL, buildApiUrl, ENDPOINTS, getApiBaseUrlError } from "./config";
 import { tokenStore } from "./tokenStore";
 
 export interface ApiResponse<T = unknown> {
@@ -37,15 +37,7 @@ function buildNetworkErrorMessage(method: string, path: string): string {
     return "You appear to be offline. Check your connection and try again.";
   }
 
-  if (API_BASE_URL_SOURCE === "http://localhost:8000" || API_BASE_URL_SOURCE === "http://127.0.0.1:8000") {
-    return `The API is still pointing to localhost while requesting ${method} ${path}. Set VITE_API_BASE_URL to the Render backend origin.`;
-  }
-
-  if (!API_BASE_URL_SOURCE) {
-    return `The API base URL is missing while requesting ${method} ${path}. Set VITE_API_BASE_URL to the Render backend origin.`;
-  }
-
-  return `Unable to reach the backend while requesting ${method} ${path}. Check the API base URL, HTTPS, and CORS settings.`;
+  return `Unable to reach the backend at ${API_BASE_URL} while requesting ${method} ${path}. Check the backend status, HTTPS, and CORS settings.`;
 }
 
 async function safeJson(res: Response): Promise<Record<string, unknown> | null> {
