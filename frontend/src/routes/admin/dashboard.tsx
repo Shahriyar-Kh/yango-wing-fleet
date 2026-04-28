@@ -1028,6 +1028,7 @@ function RegistrationsSection() {
   const [selected, setSelected] = useState<RegistrationRecord | null>(null);
   const [data, setData] = useState<{ results: RegistrationRecord[]; count: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -1037,13 +1038,19 @@ function RegistrationsSection() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     const params: Record<string, string> = { page: String(page), page_size: "20" };
     if (debouncedSearch) params.search = debouncedSearch;
     if (statusFilter) params.status = statusFilter;
     if (cityFilter) params.city = cityFilter;
     if (vehicleFilter) params.vehicle_type = vehicleFilter;
     const result = await adminApi.getRegistrations(params);
-    if (result.data) setData({ results: result.data.results, count: result.data.count });
+    if (result.error) {
+      setError(result.error);
+    }
+    if (result.data) {
+      setData({ results: result.data.results, count: result.data.count });
+    }
     setLoading(false);
   }, [page, debouncedSearch, statusFilter, cityFilter, vehicleFilter]);
 
@@ -1057,7 +1064,11 @@ function RegistrationsSection() {
   }, [load]);
 
   const handleStatusUpdate = async (id: number, status: RegistrationStatus) => {
-    await adminApi.updateRegistration(id, { status });
+    const result = await adminApi.updateRegistration(id, { status });
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     load();
   };
 
@@ -1175,6 +1186,12 @@ function RegistrationsSection() {
           </p>
         )}
 
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         <div className="rounded-2xl border border-white/8 bg-white/3 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -1284,12 +1301,17 @@ function RegistrationsSection() {
 function OffersSection() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<Partial<Offer> | null | false>(false);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     const result = await adminApi.getOffers();
+    if (result.error) {
+      setError(result.error);
+    }
     if (result.data) setOffers(result.data.results);
     setLoading(false);
   }, []);
@@ -1299,10 +1321,16 @@ function OffersSection() {
   }, [load]);
 
   const handleSave = async (data: Partial<Offer>) => {
+    setError(null);
+    let result;
     if (data.id) {
-      await adminApi.updateOffer(data.id, data);
+      result = await adminApi.updateOffer(data.id, data);
     } else {
-      await adminApi.createOffer(data);
+      result = await adminApi.createOffer(data);
+    }
+    if (result?.error) {
+      setError(result.error);
+      return;
     }
     load();
   };
@@ -1310,13 +1338,21 @@ function OffersSection() {
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this offer?")) return;
     setDeleting(id);
-    await adminApi.deleteOffer(id);
+    const result = await adminApi.deleteOffer(id);
     setDeleting(null);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     load();
   };
 
   const handleToggle = async (offer: Offer) => {
-    await adminApi.updateOffer(offer.id, { is_active: !offer.is_active });
+    const result = await adminApi.updateOffer(offer.id, { is_active: !offer.is_active });
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     load();
   };
 
@@ -1327,6 +1363,12 @@ function OffersSection() {
       )}
 
       <div className="space-y-4">
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <p className="text-sm text-white/40">
             {offers.length} offer{offers.length !== 1 ? "s" : ""} total
@@ -1434,6 +1476,7 @@ function OffersSection() {
 function BonusesSection() {
   const [bonuses, setBonuses] = useState<TripBonus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<Partial<TripBonus> | null | false>(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [cityFilter, setCityFilter] = useState("");
@@ -1441,7 +1484,11 @@ function BonusesSection() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     const result = await adminApi.getTripBonuses();
+    if (result.error) {
+      setError(result.error);
+    }
     if (result.data) setBonuses(result.data.results);
     setLoading(false);
   }, []);
@@ -1451,11 +1498,16 @@ function BonusesSection() {
   }, [load]);
 
   const handleSave = async (data: Partial<TripBonus>) => {
-    const { adminPost, adminPatch } = await import("@/lib/api/client");
+    setError(null);
+    let result;
     if (data.id) {
-      await adminPatch(`/api/admin/content/trip-bonuses/${data.id}/`, data);
+      result = await adminApi.updateTripBonus(data.id, data);
     } else {
-      await adminPost(`/api/admin/content/trip-bonuses/`, data);
+      result = await adminApi.createTripBonus(data);
+    }
+    if (result?.error) {
+      setError(result.error);
+      return;
     }
     load();
     notifyPublicSectionsUpdated();
@@ -1464,18 +1516,24 @@ function BonusesSection() {
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this bonus?")) return;
     setDeleting(id);
-    const { adminDelete } = await import("@/lib/api/client");
-    await adminDelete(`/api/admin/content/trip-bonuses/${id}/`);
+    const result = await adminApi.deleteTripBonus(id);
     setDeleting(null);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     load();
     notifyPublicSectionsUpdated();
   };
 
   const handleToggle = async (bonus: TripBonus) => {
-    const { adminPatch } = await import("@/lib/api/client");
-    await adminPatch(`/api/admin/content/trip-bonuses/${bonus.id}/`, {
+    const result = await adminApi.updateTripBonus(bonus.id, {
       is_active: !bonus.is_active,
     });
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     load();
     notifyPublicSectionsUpdated();
   };
@@ -1506,6 +1564,12 @@ function BonusesSection() {
       )}
 
       <div className="space-y-4">
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-3">
           <input
             value={cityFilter}
@@ -1653,6 +1717,7 @@ function BonusesSection() {
 function InquiriesSection() {
   const [data, setData] = useState<{ results: InquiryRecord[]; count: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -1667,11 +1732,15 @@ function InquiriesSection() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     const params: Record<string, string> = { page: String(page), page_size: "20" };
     if (debouncedSearch) params.search = debouncedSearch;
     if (typeFilter) params.inquiry_type = typeFilter;
     if (statusFilter) params.status = statusFilter;
     const result = await adminApi.getInquiries(params);
+    if (result.error) {
+      setError(result.error);
+    }
     if (result.data) setData({ results: result.data.results, count: result.data.count });
     setLoading(false);
   }, [page, debouncedSearch, typeFilter, statusFilter]);
@@ -1686,7 +1755,11 @@ function InquiriesSection() {
   }, [load]);
 
   const handleStatusChange = async (id: number, status: InquiryStatus) => {
-    await adminApi.updateInquiry(id, { status });
+    const result = await adminApi.updateInquiry(id, { status });
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     load();
   };
 
@@ -1748,6 +1821,12 @@ function InquiriesSection() {
       </div>
 
       {data && <p className="text-xs text-white/40">{data.count} inquiry results</p>}
+
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {error}
+        </div>
+      )}
 
       <div className="space-y-2">
         {loading ? (

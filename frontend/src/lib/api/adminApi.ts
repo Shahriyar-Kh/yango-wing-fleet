@@ -18,6 +18,48 @@ import type {
   PaginatedResponse,
 } from "./types";
 
+function normalizePaginated<T>(payload: unknown): PaginatedResponse<T> {
+  if (Array.isArray(payload)) {
+    return {
+      count: payload.length,
+      next: null,
+      previous: null,
+      results: payload as T[],
+    };
+  }
+
+  const maybe = payload as Partial<PaginatedResponse<T>> | null;
+  if (maybe && Array.isArray(maybe.results)) {
+    return {
+      count: Number(maybe.count ?? maybe.results.length ?? 0),
+      next: maybe.next ?? null,
+      previous: maybe.previous ?? null,
+      results: maybe.results,
+    };
+  }
+
+  return { count: 0, next: null, previous: null, results: [] };
+}
+
+async function downloadAdminCsv(path: string, filename: string): Promise<void> {
+  const access = tokenStore.getAccess();
+  const headers: Record<string, string> = {};
+  if (access) headers.Authorization = `Bearer ${access}`;
+
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers });
+  if (!response.ok) {
+    throw new Error(`Failed to export ${filename} (${response.status})`);
+  }
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(objectUrl);
+}
+
 export const adminApi = {
   // ─── Dashboard ─────────────────────────────────────────────────────────────
 
@@ -36,45 +78,44 @@ export const adminApi = {
 
   getRegistrations: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return adminGet<PaginatedResponse<RegistrationRecord>>(`${ENDPOINTS.adminRegistrations}${qs}`);
+    return adminGet<PaginatedResponse<RegistrationRecord>>(`${ENDPOINTS.adminRegistrations}${qs}`).then(
+      (result) => ({
+        ...result,
+        data: result.data ? normalizePaginated<RegistrationRecord>(result.data) : null,
+      }),
+    );
   },
 
   updateRegistration: (id: number, body: Partial<RegistrationRecord>) =>
     adminPatch<RegistrationRecord>(`${ENDPOINTS.adminRegistrations}${id}/`, body),
 
-  exportRegistrationsCsv: () => {
-    const access = tokenStore.getAccess();
-    const url = `${API_BASE_URL}${ENDPOINTS.adminRegistrationsExport}`;
-    const a = document.createElement("a");
-    a.href = access ? `${url}?token=${access}` : url;
-    a.download = "registrations.csv";
-    a.click();
-  },
+  exportRegistrationsCsv: () => downloadAdminCsv(ENDPOINTS.adminRegistrationsExport, "registrations.csv"),
 
   // ─── Inquiries ─────────────────────────────────────────────────────────────
 
   getInquiries: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return adminGet<PaginatedResponse<InquiryRecord>>(`${ENDPOINTS.adminInquiries}${qs}`);
+    return adminGet<PaginatedResponse<InquiryRecord>>(`${ENDPOINTS.adminInquiries}${qs}`).then(
+      (result) => ({
+        ...result,
+        data: result.data ? normalizePaginated<InquiryRecord>(result.data) : null,
+      }),
+    );
   },
 
   updateInquiry: (id: number, body: Partial<InquiryRecord>) =>
     adminPatch<InquiryRecord>(`${ENDPOINTS.adminInquiries}${id}/`, body),
 
-  exportInquiriesCsv: () => {
-    const access = tokenStore.getAccess();
-    const url = `${API_BASE_URL}${ENDPOINTS.adminInquiriesExport}`;
-    const a = document.createElement("a");
-    a.href = access ? `${url}?token=${access}` : url;
-    a.download = "inquiries.csv";
-    a.click();
-  },
+  exportInquiriesCsv: () => downloadAdminCsv(ENDPOINTS.adminInquiriesExport, "inquiries.csv"),
 
   // ─── Offers ────────────────────────────────────────────────────────────────
 
   getOffers: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return adminGet<PaginatedResponse<Offer>>(`${ENDPOINTS.adminOffers}${qs}`);
+    return adminGet<PaginatedResponse<Offer>>(`${ENDPOINTS.adminOffers}${qs}`).then((result) => ({
+      ...result,
+      data: result.data ? normalizePaginated<Offer>(result.data) : null,
+    }));
   },
   createOffer: (body: Partial<Offer>) => adminPost<Offer>(ENDPOINTS.adminOffers, body),
   updateOffer: (id: number, body: Partial<Offer>) =>
@@ -85,7 +126,12 @@ export const adminApi = {
 
   getTripBonuses: (params?: Record<string, string>) => {
     const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-    return adminGet<PaginatedResponse<TripBonus>>(`${ENDPOINTS.adminTripBonuses}${qs}`);
+    return adminGet<PaginatedResponse<TripBonus>>(`${ENDPOINTS.adminTripBonuses}${qs}`).then(
+      (result) => ({
+        ...result,
+        data: result.data ? normalizePaginated<TripBonus>(result.data) : null,
+      }),
+    );
   },
   createTripBonus: (body: Partial<TripBonus>) =>
     adminPost<TripBonus>(ENDPOINTS.adminTripBonuses, body),

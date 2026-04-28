@@ -152,6 +152,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # DRF
 # ------------------------------------------------------------------------------
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.StandardResultsSetPagination',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
@@ -160,19 +173,8 @@ REST_FRAMEWORK = {
         'anon': '100/day',
         'user': '1000/day',
         'registration_submit': '5/hour',   # ← Add this line
-    }
+    },
 }
-
-# Ensure JWT tokens are recognised by DRF and avoid CSRF enforcement for JWT auth
-REST_FRAMEWORK.setdefault('DEFAULT_AUTHENTICATION_CLASSES', [
-    'rest_framework_simplejwt.authentication.JWTAuthentication',
-    'rest_framework.authentication.SessionAuthentication',
-])
-
-# Keep permissions opt-in per-view; default to allowing unauthenticated read where needed
-REST_FRAMEWORK.setdefault('DEFAULT_PERMISSION_CLASSES', [
-    'rest_framework.permissions.AllowAny',
-])
 
 # ------------------------------------------------------------------------------
 # JWT

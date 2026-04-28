@@ -83,18 +83,20 @@ async function parseResponse<T>(res: Response): Promise<ApiResponse<T>> {
   try {
     json = await res.json();
   } catch {
-    // non-JSON response (e.g. CSV export)
-    return { data: null, error: res.ok ? null : "Unexpected response", status: res.status };
+    // Non-JSON success (e.g. 204) should not be treated as an error.
+    if (res.ok) {
+      return { data: null, error: null, status: res.status };
+    }
+    return { data: null, error: "Unexpected response", status: res.status };
   }
 
-// client.ts — current code (BUGGY)
-if (res.ok) {
-  return {
-    data: (json.data ?? json) as T,  // ← This is correct
-    error: null,
-    status: res.status,
-  };
-}
+  if (res.ok) {
+    return {
+      data: (json.data ?? json) as T,
+      error: null,
+      status: res.status,
+    };
+  }
 
   const fieldErrors = Object.fromEntries(
     Object.entries(json).filter(
