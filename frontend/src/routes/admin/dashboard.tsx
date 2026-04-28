@@ -39,7 +39,6 @@ import {
   Clock,
   RefreshCw,
   CheckCircle,
-  AlertCircle,
   Loader2,
   Bell,
   Search,
@@ -59,18 +58,12 @@ import {
   DollarSign,
   Package,
   Activity,
-  Settings,
   Home,
   ChevronDown,
-  MoreVertical,
   Save,
-  XCircle,
   CheckCircle2,
-  ArrowLeft,
   SlidersHorizontal,
-  Star,
   Circle,
-  TrendingDown,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { adminApi } from "@/lib/api";
@@ -137,9 +130,10 @@ function usePolling<T>(
   const [error, setError] = useState<string | null>(null);
   const lastRef = useRef<number>(0);
   const fetcherRef = useRef(fetcher);
-  
-  // Keep fetcherRef current without re-triggering effects
-  useEffect(() => { fetcherRef.current = fetcher; });
+
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  });
 
   const fetch = useCallback(async () => {
     const now = Date.now();
@@ -150,7 +144,7 @@ function usePolling<T>(
     setData(result.data);
     if (result.error) setError(result.error);
     setLoading(false);
-  }, []); // stable reference, fetcherRef handles currency
+  }, []);
 
   useEffect(() => {
     fetch();
@@ -160,6 +154,7 @@ function usePolling<T>(
 
   return { data, loading, error, refetch: fetch };
 }
+
 // ─── Mini components ──────────────────────────────────────────────────────────
 
 function Skeleton({ className = "" }: { className?: string }) {
@@ -306,7 +301,6 @@ function RegDetailDrawer({
           </button>
         </div>
 
-        {/* Avatar + Name */}
         <div className="flex items-center gap-3 mb-6 rounded-xl bg-white/4 border border-white/8 p-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/15 text-red-400 font-black text-lg">
             {record.full_name?.[0]?.toUpperCase()}
@@ -318,7 +312,6 @@ function RegDetailDrawer({
           <StatusBadge status={record.status} />
         </div>
 
-        {/* Fields */}
         <div className="space-y-3 mb-6">
           {[
             { label: "Phone", value: record.phone },
@@ -342,7 +335,6 @@ function RegDetailDrawer({
           ))}
         </div>
 
-        {/* Vehicle */}
         <div className="rounded-xl border border-white/8 bg-white/3 p-4 mb-6">
           <div className="flex items-center gap-2 mb-3">
             <VehicleIcon className="h-4 w-4 text-amber-400" />
@@ -367,7 +359,6 @@ function RegDetailDrawer({
           </div>
         </div>
 
-        {/* Status update */}
         <div className="mb-6">
           <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-2">
             Update Status
@@ -722,31 +713,41 @@ function BonusModal({
 
 // ─── Overview / Analytics ─────────────────────────────────────────────────────
 function OverviewSection({
-  summary, trends, distributions, loading,
+  summary,
+  trends,
+  loading,
 }: {
   summary: DashboardSummary | null;
   trends: DashboardTrends | null;
-  distributions: DashboardDistributions | null;
   loading: boolean;
 }) {
+  // ✅ FIX: Define totals from summary
+  const totals = summary?.totals;
+
   const [trendPeriod, setTrendPeriod] = useState<"daily" | "weekly" | "monthly">("daily");
   const [localTrends, setLocalTrends] = useState<DashboardTrends | null>(trends);
   const [trendLoading, setTrendLoading] = useState(false);
 
-  // Use initial prop, then fetch when period changes
-  useEffect(() => { setLocalTrends(trends); }, [trends]);
+  // Use localTrends for the chart
+  const trendData = localTrends;
+
+  useEffect(() => {
+    setLocalTrends(trends);
+  }, [trends]);
 
   const refetchTrends = useCallback(async () => {
     setTrendLoading(true);
     const result = await adminApi.getDashboardTrends(
       trendPeriod,
-      trendPeriod === "daily" ? 14 : 12
+      trendPeriod === "daily" ? 14 : 12,
     );
     if (result.data) setLocalTrends(result.data);
     setTrendLoading(false);
   }, [trendPeriod]);
 
-  useEffect(() => { refetchTrends(); }, [refetchTrends]);
+  useEffect(() => {
+    refetchTrends();
+  }, [refetchTrends]);
 
   return (
     <div className="space-y-6">
@@ -811,7 +812,11 @@ function OverviewSection({
               <button
                 key={p}
                 onClick={() => setTrendPeriod(p)}
-                className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${trendPeriod === p ? "bg-red-600 text-white" : "text-white/50 hover:text-white hover:bg-white/5"}`}
+                className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                  trendPeriod === p
+                    ? "bg-red-600 text-white"
+                    : "text-white/50 hover:text-white hover:bg-white/5"
+                }`}
               >
                 {p}
               </button>
@@ -935,7 +940,7 @@ function OverviewSection({
           <SectionHeader title="Registration Status Breakdown" Icon={CheckCircle} />
           <div className="mt-5 space-y-3">
             {summary!.status_counts.map((item) => {
-              const total = summary!.totals.registrations || 1;
+              const total = totals?.registrations || 1;
               const pct = Math.round((item.total / total) * 100);
               const color = REG_STATUS_COLORS[item.status as string] ?? "#6b7280";
               return (
@@ -950,7 +955,8 @@ function OverviewSection({
                     />
                   </div>
                   <div className="w-16 text-right text-sm font-bold tabular-nums">
-                    {item.total} <span className="text-white/30 font-normal text-xs">({pct}%)</span>
+                    {item.total}{" "}
+                    <span className="text-white/30 font-normal text-xs">({pct}%)</span>
                   </div>
                 </div>
               );
@@ -1024,7 +1030,6 @@ function RegistrationsSection() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  // debounce search
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400);
     return () => clearTimeout(t);
@@ -1046,7 +1051,6 @@ function RegistrationsSection() {
     load();
   }, [load]);
 
-  // poll for new items
   useEffect(() => {
     const id = setInterval(load, 30000);
     return () => clearInterval(id);
@@ -1070,7 +1074,6 @@ function RegistrationsSection() {
       )}
 
       <div className="space-y-4">
-        {/* Search + filter bar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-48">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
@@ -1086,7 +1089,11 @@ function RegistrationsSection() {
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors ${showFilters ? "border-red-500/50 bg-red-500/10 text-red-400" : "border-white/10 text-white/60 hover:border-white/20"}`}
+            className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors ${
+              showFilters
+                ? "border-red-500/50 bg-red-500/10 text-red-400"
+                : "border-white/10 text-white/60 hover:border-white/20"
+            }`}
           >
             <SlidersHorizontal className="h-4 w-4" /> Filters
           </button>
@@ -1161,7 +1168,6 @@ function RegistrationsSection() {
           </div>
         )}
 
-        {/* Count */}
         {data && (
           <p className="text-xs text-white/40">
             {data.count} registration{data.count !== 1 ? "s" : ""} found
@@ -1169,7 +1175,6 @@ function RegistrationsSection() {
           </p>
         )}
 
-        {/* Table */}
         <div className="rounded-2xl border border-white/8 bg-white/3 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -1248,7 +1253,6 @@ function RegistrationsSection() {
             </table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-white/6 px-4 py-3">
               <button
@@ -1359,7 +1363,11 @@ function OffersSection() {
             {offers.map((offer) => (
               <div
                 key={offer.id}
-                className={`rounded-2xl border p-5 transition-all ${offer.is_active ? "border-white/10 bg-white/3" : "border-white/5 bg-white/1 opacity-60"}`}
+                className={`rounded-2xl border p-5 transition-all ${
+                  offer.is_active
+                    ? "border-white/10 bg-white/3"
+                    : "border-white/5 bg-white/1 opacity-60"
+                }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1 min-w-0">
@@ -1373,7 +1381,11 @@ function OffersSection() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleToggle(offer)}
-                      className={`rounded-lg p-1.5 transition-colors ${offer.is_active ? "text-green-400 hover:bg-green-500/15" : "text-white/30 hover:bg-white/8"}`}
+                      className={`rounded-lg p-1.5 transition-colors ${
+                        offer.is_active
+                          ? "text-green-400 hover:bg-green-500/15"
+                          : "text-white/30 hover:bg-white/8"
+                      }`}
                     >
                       {offer.is_active ? (
                         <CheckCircle className="h-4 w-4" />
@@ -1478,7 +1490,6 @@ function BonusesSection() {
     [bonuses, cityFilter, vehicleFilter],
   );
 
-  // Group by city
   const grouped = useMemo(() => {
     const g: Record<string, TripBonus[]> = {};
     filtered.forEach((b) => {
@@ -1572,7 +1583,9 @@ function BonusesSection() {
                       return (
                         <tr
                           key={b.id}
-                          className={`border-b border-white/4 hover:bg-white/3 transition-colors ${!b.is_active ? "opacity-50" : ""}`}
+                          className={`border-b border-white/4 hover:bg-white/3 transition-colors ${
+                            !b.is_active ? "opacity-50" : ""
+                          }`}
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
@@ -1590,10 +1603,14 @@ function BonusesSection() {
                           <td className="px-4 py-3">
                             <button
                               onClick={() => handleToggle(b)}
-                              className={`relative h-5 w-9 rounded-full transition-colors ${b.is_active ? "bg-green-500" : "bg-white/20"}`}
+                              className={`relative h-5 w-9 rounded-full transition-colors ${
+                                b.is_active ? "bg-green-500" : "bg-white/20"
+                              }`}
                             >
                               <div
-                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${b.is_active ? "translate-x-4" : "translate-x-0.5"}`}
+                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                                  b.is_active ? "translate-x-4" : "translate-x-0.5"
+                                }`}
                               />
                             </button>
                           </td>
@@ -1744,21 +1761,35 @@ function InquiriesSection() {
           data?.results.map((item) => (
             <div
               key={item.id}
-              className={`rounded-xl border transition-all ${item.status === "new" ? "border-amber-500/25 bg-amber-500/5" : "border-white/8 bg-white/3"}`}
+              className={`rounded-xl border transition-all ${
+                item.status === "new"
+                  ? "border-amber-500/25 bg-amber-500/5"
+                  : "border-white/8 bg-white/3"
+              }`}
             >
               <div
                 className="flex flex-wrap items-center gap-3 px-4 py-3.5 cursor-pointer"
                 onClick={() => setExpanded(expanded === item.id ? null : item.id)}
               >
                 <div
-                  className={`h-2 w-2 rounded-full shrink-0 ${item.status === "new" ? "bg-amber-400" : item.status === "in_progress" ? "bg-blue-400" : "bg-white/20"}`}
+                  className={`h-2 w-2 rounded-full shrink-0 ${
+                    item.status === "new"
+                      ? "bg-amber-400"
+                      : item.status === "in_progress"
+                        ? "bg-blue-400"
+                        : "bg-white/20"
+                  }`}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-white text-sm">{item.name}</span>
                     <StatusBadge status={item.status} type="inquiry" />
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${item.inquiry_type === "support" ? "bg-blue-500/15 text-blue-400" : "bg-purple-500/15 text-purple-400"}`}
+                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                        item.inquiry_type === "support"
+                          ? "bg-blue-500/15 text-blue-400"
+                          : "bg-purple-500/15 text-purple-400"
+                      }`}
                     >
                       {item.inquiry_type}
                     </span>
@@ -1769,7 +1800,9 @@ function InquiriesSection() {
                   {item.created_at ? new Date(item.created_at).toLocaleDateString() : "—"}
                 </div>
                 <ChevronDown
-                  className={`h-4 w-4 text-white/30 shrink-0 transition-transform ${expanded === item.id ? "rotate-180" : ""}`}
+                  className={`h-4 w-4 text-white/30 shrink-0 transition-transform ${
+                    expanded === item.id ? "rotate-180" : ""
+                  }`}
                 />
               </div>
 
@@ -1802,7 +1835,11 @@ function InquiriesSection() {
                       <button
                         key={s}
                         onClick={() => handleStatusChange(item.id, s)}
-                        className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${item.status === s ? "border-red-500/50 bg-red-500/15 text-red-400" : "border-white/10 text-white/40 hover:border-white/20 hover:text-white"}`}
+                        className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
+                          item.status === s
+                            ? "border-red-500/50 bg-red-500/15 text-red-400"
+                            : "border-white/10 text-white/40 hover:border-white/20 hover:text-white"
+                        }`}
                       >
                         {s.replace(/_/g, " ")}
                       </button>
@@ -1851,24 +1888,18 @@ function AdminDashboard() {
   const [globalSearch, setGlobalSearch] = useState("");
   const prevCountRef = useRef<{ regs: number; inquiries: number }>({ regs: 0, inquiries: 0 });
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) navigate({ to: "/admin/login" });
   }, [isAuthenticated, navigate]);
 
-  // Core data
   const {
     data: summary,
     loading: summaryLoading,
     refetch: refetchSummary,
   } = usePolling(() => adminApi.getDashboardSummary(), 30000);
-  const { data: trends, loading: trendsLoading } = usePolling(
-    () => adminApi.getDashboardTrends("daily", 14),
-    60000,
-  );
+  const { data: trends } = usePolling(() => adminApi.getDashboardTrends("daily", 14), 60000);
   const { data: distributions } = usePolling(() => adminApi.getDashboardDistributions(), 60000);
 
-  // Detect new items and create notifications
   useEffect(() => {
     if (!summary) return;
     const prev = prevCountRef.current;
@@ -1948,11 +1979,11 @@ function AdminDashboard() {
       className="flex h-screen overflow-hidden bg-[#0a0a0a] text-white"
       style={{ fontFamily: "'DM Sans', 'Inter', system-ui, sans-serif" }}
     >
-      {/* ── Sidebar ── */}
       <aside
-        className={`flex flex-col border-r border-white/6 bg-[#0d0d0d] transition-all duration-300 ${sidebarOpen ? "w-56" : "w-14"} shrink-0`}
+        className={`flex flex-col border-r border-white/6 bg-[#0d0d0d] transition-all duration-300 ${
+          sidebarOpen ? "w-56" : "w-14"
+        } shrink-0`}
       >
-        {/* Logo */}
         <div className="flex h-14 items-center justify-between px-4 border-b border-white/6">
           {sidebarOpen && (
             <div className="flex items-center gap-2.5 min-w-0">
@@ -1973,13 +2004,16 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           {navItems.map(({ id, label, Icon, count }) => (
             <button
               key={id}
               onClick={() => setView(id)}
-              className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold transition-all ${view === id ? "bg-red-600/15 text-red-400 border border-red-500/20" : "text-white/50 hover:text-white hover:bg-white/5"}`}
+              className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold transition-all ${
+                view === id
+                  ? "bg-red-600/15 text-red-400 border border-red-500/20"
+                  : "text-white/50 hover:text-white hover:bg-white/5"
+              }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
               {sidebarOpen && (
@@ -1987,7 +2021,11 @@ function AdminDashboard() {
                   <span className="flex-1 text-left truncate">{label}</span>
                   {count !== undefined && count > 0 && (
                     <span
-                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${view === id ? "bg-red-500/25 text-red-400" : "bg-white/10 text-white/40"}`}
+                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
+                        view === id
+                          ? "bg-red-500/25 text-red-400"
+                          : "bg-white/10 text-white/40"
+                      }`}
                     >
                       {count > 99 ? "99+" : count}
                     </span>
@@ -1998,7 +2036,6 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        {/* Bottom */}
         <div className="border-t border-white/6 p-2">
           <button
             onClick={() => {
@@ -2013,9 +2050,7 @@ function AdminDashboard() {
         </div>
       </aside>
 
-      {/* ── Main ── */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top bar */}
         <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/6 bg-[#0d0d0d] px-4">
           <div className="flex items-center gap-2">
             <span className="text-xs text-white/30">Control Center</span>
@@ -2024,7 +2059,6 @@ function AdminDashboard() {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            {/* Global search */}
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
               <input
@@ -2035,7 +2069,6 @@ function AdminDashboard() {
               />
             </div>
 
-            {/* Refresh */}
             <button
               onClick={refetchSummary}
               className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/8 text-white/40 hover:text-white hover:border-white/15 transition-colors"
@@ -2043,7 +2076,6 @@ function AdminDashboard() {
               <RefreshCw className="h-3.5 w-3.5" />
             </button>
 
-            {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
@@ -2079,10 +2111,14 @@ function AdminDashboard() {
                       notifications.map((n) => (
                         <div
                           key={n.id}
-                          className={`flex items-start gap-3 border-b border-white/5 px-4 py-3 ${!n.read ? "bg-white/3" : ""}`}
+                          className={`flex items-start gap-3 border-b border-white/5 px-4 py-3 ${
+                            !n.read ? "bg-white/3" : ""
+                          }`}
                         >
                           <div
-                            className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${n.type === "registration" ? "bg-red-500" : "bg-amber-500"}`}
+                            className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${
+                              n.type === "registration" ? "bg-red-500" : "bg-amber-500"
+                            }`}
                           />
                           <div className="min-w-0">
                             <p className="text-xs text-white">{n.message}</p>
@@ -2098,7 +2134,6 @@ function AdminDashboard() {
               )}
             </div>
 
-            {/* Live indicator */}
             <div className="flex items-center gap-1.5 rounded-xl border border-green-500/20 bg-green-500/8 px-2.5 py-1.5">
               <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
               <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider">
@@ -2108,10 +2143,8 @@ function AdminDashboard() {
           </div>
         </header>
 
-        {/* Content */}
         <main className="flex-1 overflow-y-auto p-5">
           <div className="mx-auto max-w-7xl">
-            {/* Section titles */}
             <div className="mb-5">
               <h1 className="text-xl font-black text-white">{viewTitles[view]}</h1>
               {view === "overview" && summary && (
@@ -2121,12 +2154,10 @@ function AdminDashboard() {
               )}
             </div>
 
-            {/* Views */}
             {view === "overview" && (
               <OverviewSection
                 summary={summary}
                 trends={trends}
-                distributions={distributions}
                 loading={summaryLoading}
               />
             )}
@@ -2138,7 +2169,6 @@ function AdminDashboard() {
         </main>
       </div>
 
-      {/* Overlay for notifications on mobile */}
       {notifOpen && (
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setNotifOpen(false)} />
       )}

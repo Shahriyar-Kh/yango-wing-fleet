@@ -10,7 +10,6 @@ export const getRouter = () => {
   return router;
 };
 
-// Remove any 'declare module' referencing '@tanstack/react-start'
 declare module "@tanstack/react-router" {
   interface Register {
     router: ReturnType<typeof getRouter>;
