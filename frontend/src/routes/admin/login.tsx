@@ -2,7 +2,7 @@
  * routes/admin/login.tsx — JWT login page for the private admin dashboard.
  */
 
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
@@ -82,7 +82,15 @@ function AdminLoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Password</label>
+            <label className="block text-sm font-semibold mb-2 flex items-center justify-between">
+              <span>Password</span>
+              <Link
+                to="/admin/forgot-password"
+                className="text-xs text-gold hover:underline font-semibold"
+              >
+                Forgot password?
+              </Link>
+            </label>
             <div className="relative">
               <input
                 {...register("password", { required: true })}

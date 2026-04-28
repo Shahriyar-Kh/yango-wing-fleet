@@ -161,6 +161,7 @@ REST_FRAMEWORK = {
         "user": "300/minute",
         "registration_submit": "10/hour",
         "inquiry_submit": "20/hour",
+        "password_reset_request": "5/hour",
     },
 }
 
@@ -177,6 +178,7 @@ CORS_ALLOWED_ORIGINS = [
     for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
     if origin.strip()
 ]
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
@@ -195,3 +197,77 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "noreply
 
 ADMIN_NOTIFICATION_EMAIL = os.getenv("ADMIN_NOTIFICATION_EMAIL", DEFAULT_FROM_EMAIL)
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+
+# ── Authentication & Security ─────────────────────────────────────────────────
+PASSWORD_RESET_TOKEN_EXPIRY_HOURS = int(os.getenv("PASSWORD_RESET_TOKEN_EXPIRY_HOURS", "1"))
+PASSWORD_RESET_REQUEST_RATE_LIMIT = os.getenv("PASSWORD_RESET_REQUEST_RATE_LIMIT", "5/hour")
+
+# ── Logging Configuration ───────────────────────────────────────────────────────
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+        "simple": {
+            "format": "{levelname} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+            "stream": "ext://sys.stdout",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "django.log"),
+            "formatter": "verbose",
+            "encoding": "utf-8",  # Handle UTF-8 on Windows
+        },
+        "email_file": {
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "email.log"),
+            "formatter": "verbose",
+            "encoding": "utf-8",  # Handle UTF-8 on Windows
+        },
+    },
+    "loggers": {
+        # Email delivery logging
+        "core.services.email_service": {
+            "handlers": ["console", "email_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "registrations.services.notifications": {
+            "handlers": ["console", "email_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "core.auth_views": {
+            "handlers": ["console", "email_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "registrations.views": {
+            "handlers": ["console", "email_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # Django email backend logging
+        "django.core.mail": {
+            "handlers": ["console", "email_file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        # Root logger
+        "": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+    },
+}

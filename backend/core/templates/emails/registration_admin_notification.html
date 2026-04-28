@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>New Rider Registration Received</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f5f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5f7; margin:0; padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#ffffff; border-collapse:collapse; border:1px solid #e5e7eb;">
+          <tr>
+            <td style="background:linear-gradient(135deg, #111827 0%, #1f2937 100%); background-color:#111827; padding:24px 28px; border-bottom:3px solid #d4af37;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <div style="font-size:22px; font-weight:700; letter-spacing:0.4px; color:#ffffff; line-height:1.2;">Yango Wing Fleet</div>
+                    <div style="font-size:12px; color:#d1d5db; letter-spacing:1.1px; text-transform:uppercase; margin-top:4px;">New Rider Registration Alert</div>
+                  </td>
+                  <td align="right" style="vertical-align:middle;">
+                    <div style="display:inline-block; padding:8px 12px; background-color:#d4af37; color:#111827; font-size:12px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase; border-radius:999px;">Admin Notification</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:28px;">
+              <p style="margin:0 0 16px; font-size:16px; line-height:1.7; color:#374151;">A new rider has submitted a registration form. Details are below.</p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; margin:0 0 18px;">
+                <tr>
+                  <td style="padding:0 0 10px;">
+                    <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:10px;">Rider Details</div>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb; border-collapse:collapse; background-color:#fafafa;">
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Full Name</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ full_name }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Phone Number</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;"><a href="{{ contact_tel_link }}" style="color:#b45309; text-decoration:none;">{{ phone }}</a></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">CNIC</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ cnic }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">CNIC Issue Date</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ cnic_issue_date }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">CNIC Expiry Date</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ cnic_expiry_date }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Email</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;"><a href="mailto:{{ email }}" style="color:#b45309; text-decoration:none;">{{ email }}</a></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; font-size:13px; color:#6b7280; font-weight:700;">City</td>
+                        <td style="padding:12px 14px; font-size:14px; color:#111827; font-weight:600;">{{ city }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; margin:0 0 18px;">
+                <tr>
+                  <td style="padding:0 0 10px;">
+                    <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:10px;">Vehicle Details</div>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb; border-collapse:collapse; background-color:#fafafa;">
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Vehicle Type</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600; text-transform:capitalize;">{{ vehicle_type }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Vehicle Number Plate</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ vehicle_number_plate }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Vehicle Make</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ vehicle_make }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; border-bottom:1px solid #e5e7eb; font-size:13px; color:#6b7280; font-weight:700;">Vehicle Model</td>
+                        <td style="padding:12px 14px; border-bottom:1px solid #e5e7eb; font-size:14px; color:#111827; font-weight:600;">{{ vehicle_model }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; font-size:13px; color:#6b7280; font-weight:700;">Vehicle Color</td>
+                        <td style="padding:12px 14px; font-size:14px; color:#111827; font-weight:600;">{{ vehicle_color }}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:12px 14px; width:35%; font-size:13px; color:#6b7280; font-weight:700;">Vehicle Year</td>
+                        <td style="padding:12px 14px; font-size:14px; color:#111827; font-weight:600;">{{ vehicle_year }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              {% if notes %}
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; margin:0 0 18px;">
+                <tr>
+                  <td style="padding:0 0 10px;">
+                    <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:10px;">Notes</div>
+                    <div style="border:1px solid #e5e7eb; background-color:#fcfcfc; padding:14px; font-size:14px; line-height:1.7; color:#374151; white-space:pre-wrap;">{{ notes }}</div>
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; margin:0 0 18px;">
+                <tr>
+                  <td style="padding:0 0 10px;">
+                    <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:10px;">Copy-Friendly Summary</div>
+                    <div style="border:1px dashed #d4af37; background-color:#fffaf0; padding:16px; font-family:'Courier New', Courier, monospace; font-size:13px; line-height:1.8; color:#111827; white-space:pre-wrap; word-break:break-word;">Full Name: {{ full_name }}
+Phone: {{ phone }}
+City: {{ city }}
+Vehicle: {{ vehicle_type }} – {{ vehicle_model }} ({{ vehicle_year }})</div>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px; border-collapse:collapse;">
+                <tr>
+                  <td style="padding:14px 16px; background-color:#f9fafb; border:1px solid #e5e7eb; font-size:13px; color:#4b5563;">
+                    <strong style="color:#111827;">Submitted At:</strong> {{ submitted_at_display }}
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 22px;">
+                <tr>
+                  <td align="center" style="border-radius:6px; background-color:#d4af37;">
+                    <a href="{{ contact_whatsapp_link|default:contact_tel_link }}" style="display:inline-block; padding:13px 22px; font-size:14px; font-weight:700; color:#111827; text-decoration:none; border-radius:6px;">Contact Rider</a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px;">
+                <tr>
+                  <td style="padding:0; font-size:13px; color:#6b7280; line-height:1.7;">
+                    <strong style="color:#111827;">Admin Quick Use:</strong> You can copy the summary block above directly into WhatsApp, CRM notes, or manual registration records.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:18px 28px 24px; border-top:1px solid #e5e7eb; background-color:#fafafa;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-size:12px; color:#6b7280; line-height:1.7;">
+                    <div style="font-weight:700; color:#111827; margin-bottom:6px;">Yango Wing Fleet – Registration System</div>
+                    <div>Contact Email: <a href="mailto:{{ admin_email }}" style="color:#b45309; text-decoration:none;">{{ admin_email }}</a></div>
+                    <div style="margin-top:8px;">This is an automated notification for internal review only. Please keep rider data confidential.</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -209,6 +209,32 @@ export interface LoginPayload {
   password: string;
 }
 
+// ─── Password Reset ───────────────────────────────────────────────────────────
+
+export interface PasswordResetRequestPayload {
+  email: string;
+}
+
+export interface PasswordResetRequestResponse {
+  email: string;
+}
+
+export interface PasswordResetVerifyResponse {
+  token: string;
+  email: string;
+  expires_at: string;
+}
+
+export interface PasswordResetConfirmPayload {
+  token: string;
+  new_password: string;
+  new_password_confirm: string;
+}
+
+export interface PasswordResetConfirmResponse {
+  email: string;
+}
+
 // ─── Pagination ───────────────────────────────────────────────────────────────
 
 export interface PaginatedResponse<T> {

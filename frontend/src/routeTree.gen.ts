@@ -21,8 +21,11 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CitiesCityRouteImport } from './routes/cities.$city'
+import { Route as AdminResetPasswordSuccessRouteImport } from './routes/admin/reset-password-success'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminForgotPasswordRouteImport } from './routes/admin/forgot-password'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminResetPasswordTokenRouteImport } from './routes/admin/reset-password.$token'
 
 const ThankYouRoute = ThankYouRouteImport.update({
   id: '/thank-you',
@@ -84,14 +87,30 @@ const CitiesCityRoute = CitiesCityRouteImport.update({
   path: '/cities/$city',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminResetPasswordSuccessRoute =
+  AdminResetPasswordSuccessRouteImport.update({
+    id: '/admin/reset-password-success',
+    path: '/admin/reset-password-success',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminForgotPasswordRoute = AdminForgotPasswordRouteImport.update({
+  id: '/admin/forgot-password',
+  path: '/admin/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminResetPasswordTokenRoute = AdminResetPasswordTokenRouteImport.update({
+  id: '/admin/reset-password/$token',
+  path: '/admin/reset-password/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -108,8 +127,11 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/thank-you': typeof ThankYouRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password-success': typeof AdminResetPasswordSuccessRoute
   '/cities/$city': typeof CitiesCityRoute
+  '/admin/reset-password/$token': typeof AdminResetPasswordTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,8 +146,11 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/thank-you': typeof ThankYouRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password-success': typeof AdminResetPasswordSuccessRoute
   '/cities/$city': typeof CitiesCityRoute
+  '/admin/reset-password/$token': typeof AdminResetPasswordTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,8 +166,11 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/thank-you': typeof ThankYouRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/reset-password-success': typeof AdminResetPasswordSuccessRoute
   '/cities/$city': typeof CitiesCityRoute
+  '/admin/reset-password/$token': typeof AdminResetPasswordTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,8 +187,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/thank-you'
     | '/admin/dashboard'
+    | '/admin/forgot-password'
     | '/admin/login'
+    | '/admin/reset-password-success'
     | '/cities/$city'
+    | '/admin/reset-password/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,8 +206,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/thank-you'
     | '/admin/dashboard'
+    | '/admin/forgot-password'
     | '/admin/login'
+    | '/admin/reset-password-success'
     | '/cities/$city'
+    | '/admin/reset-password/$token'
   id:
     | '__root__'
     | '/'
@@ -191,8 +225,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/thank-you'
     | '/admin/dashboard'
+    | '/admin/forgot-password'
     | '/admin/login'
+    | '/admin/reset-password-success'
     | '/cities/$city'
+    | '/admin/reset-password/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -208,8 +245,11 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ThankYouRoute: typeof ThankYouRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminForgotPasswordRoute: typeof AdminForgotPasswordRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminResetPasswordSuccessRoute: typeof AdminResetPasswordSuccessRoute
   CitiesCityRoute: typeof CitiesCityRoute
+  AdminResetPasswordTokenRoute: typeof AdminResetPasswordTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -298,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitiesCityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/reset-password-success': {
+      id: '/admin/reset-password-success'
+      path: '/admin/reset-password-success'
+      fullPath: '/admin/reset-password-success'
+      preLoaderRoute: typeof AdminResetPasswordSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -305,11 +352,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/forgot-password': {
+      id: '/admin/forgot-password'
+      path: '/admin/forgot-password'
+      fullPath: '/admin/forgot-password'
+      preLoaderRoute: typeof AdminForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reset-password/$token': {
+      id: '/admin/reset-password/$token'
+      path: '/admin/reset-password/$token'
+      fullPath: '/admin/reset-password/$token'
+      preLoaderRoute: typeof AdminResetPasswordTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -328,8 +389,11 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ThankYouRoute: ThankYouRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminForgotPasswordRoute: AdminForgotPasswordRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminResetPasswordSuccessRoute: AdminResetPasswordSuccessRoute,
   CitiesCityRoute: CitiesCityRoute,
+  AdminResetPasswordTokenRoute: AdminResetPasswordTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

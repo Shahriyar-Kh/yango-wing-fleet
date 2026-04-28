@@ -1,7 +1,9 @@
 import csv
+import logging
 
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db import transaction
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAdminUser
@@ -17,26 +19,40 @@ from registrations.serializers import (
 from registrations.services.notifications import send_registration_notifications
 
 
+logger = logging.getLogger(__name__)
+
+
 class PublicRegistrationCreateAPIView(APIView):
 	permission_classes = [AllowAny]
 	throttle_classes = [RegistrationSubmitRateThrottle]
 
 	def post(self, request):
+		logger.info(f"Registration submission from IP: {self._get_client_ip(request)}")
+		
 		serializer = RegistrationSubmissionCreateSerializer(data=request.data)
 		try:
 			serializer.is_valid(raise_exception=True)
 		except ValidationError as exc:
+			logger.warning(f"Registration validation failed: {exc.detail}")
 			return api_error(message="Validation failed", errors=exc.detail, status_code=status.HTTP_400_BAD_REQUEST)
+		
+		logger.info(f"Creating registration submission for: {request.data.get('full_name')}")
 		registration = serializer.save(
 			source_ip=self._get_client_ip(request),
 			user_agent=request.META.get("HTTP_USER_AGENT", "")[:1000],
 		)
+		logger.info(f"Registration saved to database: submission_id={registration.id}, name={registration.full_name}")
 
-		try:
-			send_registration_notifications(registration)
-		except Exception:
-			# Preserve registration even if email delivery is temporarily unavailable.
-			pass
+		def _send_notifications():
+			logger.info(f"transaction.on_commit fired: sending notifications for submission {registration.id}")
+			try:
+				send_registration_notifications(registration)
+				logger.info(f"Notifications sent successfully for submission {registration.id}")
+			except Exception as e:
+				logger.exception(f"Failed to send registration notifications for submission {registration.id}: {str(e)}")
+
+		transaction.on_commit(_send_notifications)
+		logger.debug(f"transaction.on_commit registered for submission {registration.id}")
 
 		return api_success(
 			data={"id": registration.id, "status": registration.status},

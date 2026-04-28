@@ -1,4 +1,4 @@
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
 class RegistrationSubmitRateThrottle(AnonRateThrottle):
@@ -7,3 +7,8 @@ class RegistrationSubmitRateThrottle(AnonRateThrottle):
 
 class InquirySubmitRateThrottle(AnonRateThrottle):
     scope = "inquiry_submit"
+
+
+class PasswordResetRateThrottle(AnonRateThrottle):
+    """Rate limit password reset requests to prevent abuse."""
+    scope = "password_reset_request"

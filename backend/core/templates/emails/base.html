@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background: #f9f9f9; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header-logo { font-size: 28px; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; }
+        .header-sub { font-size: 12px; opacity: 0.9; letter-spacing: 0.15em; text-transform: uppercase; }
+        .content { padding: 40px 30px; }
+        .content h1 { font-size: 24px; margin-bottom: 20px; color: #DC143C; }
+        .content p { margin-bottom: 15px; line-height: 1.8; }
+        .cta-button { display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; transition: opacity 0.3s; }
+        .cta-button:hover { opacity: 0.9; }
+        .notice { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 13px; }
+        .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; }
+        .footer-link { color: #DC143C; text-decoration: none; }
+        .divider { height: 1px; background: #e0e0e0; margin: 30px 0; }
+        .highlight { color: #DC143C; font-weight: 600; }
+        .badge { display: inline-block; background: #DC143C; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin: 0 5px; }
+        @media (max-width: 600px) { .container { border-radius: 0; } .content { padding: 25px 15px; } .header { padding: 20px 15px; } .content h1 { font-size: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-logo">YANGO</div>
+            <div class="header-sub">Wing Fleet</div>
+        </div>
+        
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <div class="footer">
+            <p><strong>Yango Wing Fleet</strong> – Professional Driver Support Platform</p>
+            <p style="margin-top: 10px;">Active in: Karachi • Lahore • Islamabad • Rawalpindi</p>
+            <p style="margin-top: 10px;">© 2026 Yango Wing Fleet. All rights reserved.</p>
+            <p style="margin-top: 15px; color: #999;">
+                <a href="https://yangowingfleet.pk" class="footer-link">Visit our website</a> | 
+                <a href="tel:+923231213999" class="footer-link">Call: 0323-1213999</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

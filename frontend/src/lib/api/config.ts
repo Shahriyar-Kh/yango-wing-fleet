@@ -2,7 +2,7 @@
  * API configuration — central place for all backend URLs and constants.
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+export const API_BASE_URL = "http://localhost:8000";
 
 export const ENDPOINTS = {
   // Public
@@ -14,6 +14,9 @@ export const ENDPOINTS = {
   // Auth
   tokenObtain: "/api/auth/token/",
   tokenRefresh: "/api/auth/token/refresh/",
+  passwordResetRequest: "/api/auth/password-reset/request/",
+  passwordResetVerify: "/api/auth/password-reset/verify/",
+  passwordResetConfirm: "/api/auth/password-reset/confirm/",
 
   // Admin — content
   adminOffers: "/api/admin/content/offers/",
