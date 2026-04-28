@@ -4,15 +4,15 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Command(BaseCommand):
-    help = 'Ensures a fresh admin superuser with full permissions'
+    help = 'Deletes conflicting admin users and creates a fresh superuser'
 
     def handle(self, *args, **options):
-        target_username = 'yangowingfleet_admin'
+        target_username = 'yangowingfleet'
         target_email = 'yangowingfleet@gmail.com'
         target_password = 'yangowingfleet786'
 
         # Delete any users with conflicting usernames
-        usernames_to_delete = ['admin']
+        usernames_to_delete = ['admin', 'yangowingfleet_admin']
         deleted = 0
         for username in usernames_to_delete:
             users = User.objects.filter(username=username)
