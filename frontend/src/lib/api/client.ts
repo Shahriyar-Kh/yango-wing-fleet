@@ -5,7 +5,7 @@
  * - Wraps all responses in a consistent { data, error } shape.
  */
 
-import { API_BASE_URL, ENDPOINTS } from "./config";
+import { buildApiUrl, ENDPOINTS, getApiBaseUrlError, API_BASE_URL_SOURCE } from "./config";
 import { tokenStore } from "./tokenStore";
 
 export interface ApiResponse<T = unknown> {
@@ -22,10 +22,38 @@ async function rawFetch(url: string, options: RequestInit = {}): Promise<Respons
     ...options,
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       "Cache-Control": "no-cache",
       ...(options.headers ?? {}),
     },
   });
+}
+
+function buildNetworkErrorMessage(method: string, path: string): string {
+  const configError = getApiBaseUrlError();
+  if (configError) return configError;
+
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return "You appear to be offline. Check your connection and try again.";
+  }
+
+  if (API_BASE_URL_SOURCE === "http://localhost:8000" || API_BASE_URL_SOURCE === "http://127.0.0.1:8000") {
+    return `The API is still pointing to localhost while requesting ${method} ${path}. Set VITE_API_BASE_URL to the Render backend origin.`;
+  }
+
+  if (!API_BASE_URL_SOURCE) {
+    return `The API base URL is missing while requesting ${method} ${path}. Set VITE_API_BASE_URL to the Render backend origin.`;
+  }
+
+  return `Unable to reach the backend while requesting ${method} ${path}. Check the API base URL, HTTPS, and CORS settings.`;
+}
+
+async function safeJson(res: Response): Promise<Record<string, unknown> | null> {
+  try {
+    return (await res.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
 }
 
 // ─── Token refresh ────────────────────────────────────────────────────────────
@@ -35,7 +63,7 @@ async function refreshAccessToken(): Promise<boolean> {
   if (!refresh) return false;
 
   try {
-    const res = await rawFetch(`${API_BASE_URL}${ENDPOINTS.tokenRefresh}`, {
+    const res = await rawFetch(buildApiUrl(ENDPOINTS.tokenRefresh), {
       method: "POST",
       body: JSON.stringify({ refresh }),
     });
@@ -43,9 +71,13 @@ async function refreshAccessToken(): Promise<boolean> {
       tokenStore.clear();
       return false;
     }
-    const json = await res.json();
-    tokenStore.setAccess(json.access ?? null);
-    if (json.refresh) tokenStore.setRefresh(json.refresh);
+    const json = (await safeJson(res)) as { access?: string | null; refresh?: string | null } | null;
+    if (typeof json?.access === "string") {
+      tokenStore.setAccess(json.access);
+    }
+    if (typeof json?.refresh === "string") {
+      tokenStore.setRefresh(json.refresh);
+    }
     return true;
   } catch {
     tokenStore.clear();
@@ -79,15 +111,18 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
 // ─── Generic request helpers ──────────────────────────────────────────────────
 
 async function parseResponse<T>(res: Response): Promise<ApiResponse<T>> {
-  let json: Record<string, unknown> = {};
-  try {
-    json = await res.json();
-  } catch {
-    // Non-JSON success (e.g. 204) should not be treated as an error.
+  const json = await safeJson(res);
+
+  if (!json) {
     if (res.ok) {
       return { data: null, error: null, status: res.status };
     }
-    return { data: null, error: "Unexpected response", status: res.status };
+
+    return {
+      data: null,
+      error: `Unexpected non-JSON response (${res.status})`,
+      status: res.status,
+    };
   }
 
   if (res.ok) {
@@ -112,7 +147,11 @@ async function parseResponse<T>(res: Response): Promise<ApiResponse<T>> {
 
   return {
     data: null,
-    error: (json.message as string) ?? (json.detail as string) ?? "An error occurred",
+    error:
+      (json.message as string) ??
+      (json.detail as string) ??
+      (json.error as string) ??
+      "An error occurred",
     errors:
       (json.errors as Record<string, string[]> | undefined) ??
       (Object.keys(fieldErrors).length > 0 ? (fieldErrors as Record<string, string[]>) : undefined),
@@ -120,75 +159,56 @@ async function parseResponse<T>(res: Response): Promise<ApiResponse<T>> {
   };
 }
 
+async function request<T>(
+  method: string,
+  path: string,
+  options: RequestInit = {},
+  authenticated = false,
+): Promise<ApiResponse<T>> {
+  const apiBaseError = getApiBaseUrlError();
+  if (apiBaseError) {
+    return { data: null, error: apiBaseError, status: 0 };
+  }
+
+  try {
+    const url = buildApiUrl(path);
+    const res = authenticated ? await authFetch(url, { ...options, method }) : await rawFetch(url, { ...options, method });
+    return parseResponse<T>(res);
+  } catch {
+    return { data: null, error: buildNetworkErrorMessage(method, path), status: 0 };
+  }
+}
+
 // ─── Public (unauthenticated) requests ────────────────────────────────────────
 
 export async function publicGet<T = unknown>(path: string): Promise<ApiResponse<T>> {
-  try {
-    const res = await rawFetch(`${API_BASE_URL}${path}`);
-    return parseResponse<T>(res);
-  } catch {
-    return { data: null, error: "Network error. Please check your connection.", status: 0 };
-  }
+  return request<T>("GET", path);
 }
 
 export async function publicPost<T = unknown>(
   path: string,
   body: unknown,
 ): Promise<ApiResponse<T>> {
-  try {
-    const res = await rawFetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-    return parseResponse<T>(res);
-  } catch {
-    return { data: null, error: "Network error. Please check your connection.", status: 0 };
-  }
+  return request<T>("POST", path, { body: JSON.stringify(body) });
 }
 
 // ─── Authenticated (admin) requests ──────────────────────────────────────────
 
 export async function adminGet<T = unknown>(path: string): Promise<ApiResponse<T>> {
-  try {
-    const res = await authFetch(`${API_BASE_URL}${path}`);
-    return parseResponse<T>(res);
-  } catch {
-    return { data: null, error: "Network error. Please check your connection.", status: 0 };
-  }
+  return request<T>("GET", path, {}, true);
 }
 
 export async function adminPost<T = unknown>(path: string, body: unknown): Promise<ApiResponse<T>> {
-  try {
-    const res = await authFetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-    return parseResponse<T>(res);
-  } catch {
-    return { data: null, error: "Network error. Please check your connection.", status: 0 };
-  }
+  return request<T>("POST", path, { body: JSON.stringify(body) }, true);
 }
 
 export async function adminPatch<T = unknown>(
   path: string,
   body: unknown,
 ): Promise<ApiResponse<T>> {
-  try {
-    const res = await authFetch(`${API_BASE_URL}${path}`, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    });
-    return parseResponse<T>(res);
-  } catch {
-    return { data: null, error: "Network error. Please check your connection.", status: 0 };
-  }
+  return request<T>("PATCH", path, { body: JSON.stringify(body) }, true);
 }
 
 export async function adminDelete<T = unknown>(path: string): Promise<ApiResponse<T>> {
-  try {
-    const res = await authFetch(`${API_BASE_URL}${path}`, { method: "DELETE" });
-    return parseResponse<T>(res);
-  } catch {
-    return { data: null, error: "Network error. Please check your connection.", status: 0 };
-  }
+  return request<T>("DELETE", path, {}, true);
 }

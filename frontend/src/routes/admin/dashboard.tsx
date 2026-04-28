@@ -1968,7 +1968,7 @@ function AdminDashboard() {
   const prevCountRef = useRef<{ regs: number; inquiries: number }>({ regs: 0, inquiries: 0 });
 
   useEffect(() => {
-    if (!isAuthenticated) navigate({ to: "/admin/login" });
+    if (!isAuthenticated) navigate({ to: "/admin/login", replace: true });
   }, [isAuthenticated, navigate]);
 
   const {

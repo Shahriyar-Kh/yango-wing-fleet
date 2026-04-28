@@ -3,7 +3,7 @@
  */
 
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,11 +32,13 @@ function AdminLoginPage() {
     formState: { isSubmitting },
   } = useForm<LoginForm>();
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate({ to: "/admin/dashboard" });
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate({ to: "/admin/dashboard", replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (isAuthenticated) return null;
 
   const onSubmit = async (data: LoginForm) => {
     setLoginError(null);
@@ -44,7 +46,7 @@ function AdminLoginPage() {
     if (result.error) {
       setLoginError(result.error);
     } else {
-      navigate({ to: "/admin/dashboard" });
+      navigate({ to: "/admin/dashboard", replace: true });
     }
   };
 
@@ -82,7 +84,7 @@ function AdminLoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2 flex items-center justify-between">
+            <label className="mb-2 flex items-center justify-between text-sm font-semibold">
               <span>Password</span>
               <Link
                 to="/admin/forgot-password"
