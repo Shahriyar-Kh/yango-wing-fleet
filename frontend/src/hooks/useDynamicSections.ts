@@ -7,6 +7,29 @@ import { useEffect, useState } from "react";
 import { publicApi } from "@/lib/api";
 import type { DynamicSections, Offer, TripBonus } from "@/lib/api";
 
+const PUBLIC_SECTIONS_SYNC_KEY = "ywf-public-sections-sync";
+
+export function notifyPublicSectionsUpdated() {
+  if (typeof window === "undefined") return;
+
+  const stamp = String(Date.now());
+  try {
+    window.localStorage.setItem(PUBLIC_SECTIONS_SYNC_KEY, stamp);
+  } catch {
+    // Ignore storage failures; polling still keeps data fresh.
+  }
+
+  if (typeof BroadcastChannel !== "undefined") {
+    try {
+      const channel = new BroadcastChannel(PUBLIC_SECTIONS_SYNC_KEY);
+      channel.postMessage(stamp);
+      channel.close();
+    } catch {
+      // Ignore broadcast failures.
+    }
+  }
+}
+
 // ─── Fallback data (mirrors backend fallbacks.py) ─────────────────────────────
 
 const FALLBACK_OFFERS: Offer[] = [
@@ -106,6 +129,37 @@ export function useDynamicSections(): UseDynamicSectionsReturn {
       cancelled = true;
     };
   }, [tick]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const refresh = () => setTick((t) => t + 1);
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === PUBLIC_SECTIONS_SYNC_KEY) refresh();
+    };
+
+    window.addEventListener("storage", onStorage);
+
+    let channel: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== "undefined") {
+      channel = new BroadcastChannel(PUBLIC_SECTIONS_SYNC_KEY);
+      channel.onmessage = refresh;
+    }
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      if (channel) channel.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 30000);
+
+    return () => clearInterval(id);
+  }, []);
 
   return {
     data,

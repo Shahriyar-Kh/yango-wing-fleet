@@ -35,6 +35,7 @@ import { CITIES, SERVICES, WHATSAPP_URL, BRAND } from "@/lib/brand";
 import { Reveal, SectionTitle } from "@/components/ui-kit";
 import { HeroOfferCards } from "@/components/HeroOfferCards";
 import { EarningsHighlight } from "@/components/EarningsHighlight";
+import { BonusSection } from "@/components/BonusSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -170,6 +171,9 @@ function HomePage() {
 
       {/* ── EARNINGS HIGHLIGHT ────────────────────────────────────────────── */}
       <EarningsHighlight />
+
+      {/* ── CITY BONUSES ─────────────────────────────────────────────────── */}
+      <BonusSection />
 
       {/* ── INTRO VIDEO PLACEHOLDER ───────────────────────────────────────── */}
       <section className="container-x py-12 md:py-16">

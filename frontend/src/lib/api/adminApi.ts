@@ -1,5 +1,6 @@
 /**
  * adminApi — all JWT-protected API calls for the admin dashboard.
+ * Updated: added full TripBonus CRUD + getDashboardYearly
  */
 
 import { adminGet, adminPost, adminPatch, adminDelete } from "./client";
@@ -69,13 +70,26 @@ export const adminApi = {
     a.click();
   },
 
-  // ─── Content management ────────────────────────────────────────────────────
+  // ─── Offers ────────────────────────────────────────────────────────────────
 
-  getOffers: () => adminGet<PaginatedResponse<Offer>>(ENDPOINTS.adminOffers),
+  getOffers: (params?: Record<string, string>) => {
+    const qs = params ? "?" + new URLSearchParams(params).toString() : "";
+    return adminGet<PaginatedResponse<Offer>>(`${ENDPOINTS.adminOffers}${qs}`);
+  },
   createOffer: (body: Partial<Offer>) => adminPost<Offer>(ENDPOINTS.adminOffers, body),
   updateOffer: (id: number, body: Partial<Offer>) =>
     adminPatch<Offer>(`${ENDPOINTS.adminOffers}${id}/`, body),
   deleteOffer: (id: number) => adminDelete(`${ENDPOINTS.adminOffers}${id}/`),
 
-  getTripBonuses: () => adminGet<PaginatedResponse<TripBonus>>(ENDPOINTS.adminTripBonuses),
+  // ─── Trip Bonuses ──────────────────────────────────────────────────────────
+
+  getTripBonuses: (params?: Record<string, string>) => {
+    const qs = params ? "?" + new URLSearchParams(params).toString() : "";
+    return adminGet<PaginatedResponse<TripBonus>>(`${ENDPOINTS.adminTripBonuses}${qs}`);
+  },
+  createTripBonus: (body: Partial<TripBonus>) =>
+    adminPost<TripBonus>(ENDPOINTS.adminTripBonuses, body),
+  updateTripBonus: (id: number, body: Partial<TripBonus>) =>
+    adminPatch<TripBonus>(`${ENDPOINTS.adminTripBonuses}${id}/`, body),
+  deleteTripBonus: (id: number) => adminDelete(`${ENDPOINTS.adminTripBonuses}${id}/`),
 };
