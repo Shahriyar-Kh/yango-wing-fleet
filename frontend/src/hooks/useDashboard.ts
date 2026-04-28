@@ -34,10 +34,40 @@ function useAdminQuery<T>(fetcher: () => Promise<{ data: T | null; error: string
   return { data, loading, error, refetch: fetch };
 }
 
+function useAdminQueryEnabled<T>(
+  fetcher: () => Promise<{ data: T | null; error: string | null }>,
+  enabled: boolean,
+) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(enabled);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    const result = await fetcher();
+    setData(result.data);
+    setError(result.error);
+    setLoading(false);
+  }, [enabled, fetcher]);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { data, loading, error, refetch: fetch };
+}
+
 // ─── Dashboard summary ────────────────────────────────────────────────────────
 
-export function useDashboardSummary() {
-  return useAdminQuery<DashboardSummary>(() => adminApi.getDashboardSummary());
+export function useDashboardSummary(enabled = true) {
+  return useAdminQueryEnabled<DashboardSummary>(() => adminApi.getDashboardSummary(), enabled);
 }
 
 // ─── Dashboard trends ─────────────────────────────────────────────────────────
@@ -45,19 +75,26 @@ export function useDashboardSummary() {
 export function useDashboardTrends(
   period: "daily" | "weekly" | "monthly" | "yearly" = "daily",
   limit = 30,
+  enabled = true,
 ) {
   const [data, setData] = useState<DashboardTrends | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     const result = await adminApi.getDashboardTrends(period, limit);
     setData(result.data);
     setError(result.error);
     setLoading(false);
-  }, [period, limit]);
+  }, [enabled, period, limit]);
 
   useEffect(() => {
     fetch();
@@ -68,25 +105,31 @@ export function useDashboardTrends(
 
 // ─── Dashboard distributions ──────────────────────────────────────────────────
 
-export function useDashboardDistributions() {
-  return useAdminQuery<DashboardDistributions>(() => adminApi.getDashboardDistributions());
+export function useDashboardDistributions(enabled = true) {
+  return useAdminQueryEnabled<DashboardDistributions>(() => adminApi.getDashboardDistributions(), enabled);
 }
 
 // ─── Dashboard latest activity ────────────────────────────────────────────────
 
-export function useDashboardLatest(limit = 20) {
+export function useDashboardLatest(limit = 20, enabled = true) {
   const [data, setData] = useState<DashboardLatest | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(async () => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     const result = await adminApi.getDashboardLatest(limit);
     setData(result.data);
     setError(result.error);
     setLoading(false);
-  }, [limit]);
+  }, [enabled, limit]);
 
   useEffect(() => {
     fetch();

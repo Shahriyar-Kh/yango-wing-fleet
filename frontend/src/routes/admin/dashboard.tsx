@@ -124,9 +124,10 @@ const VEHICLE_ICONS: Record<string, React.ElementType> = {
 function usePolling<T>(
   fetcher: () => Promise<{ data: T | null; error: string | null }>,
   intervalMs = 30000,
+  enabled = true,
 ) {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const lastRef = useRef<number>(0);
   const fetcherRef = useRef(fetcher);
@@ -147,10 +148,16 @@ function usePolling<T>(
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     fetch();
     const id = setInterval(fetch, intervalMs);
     return () => clearInterval(id);
-  }, [fetch, intervalMs]);
+  }, [fetch, intervalMs, enabled]);
 
   return { data, loading, error, refetch: fetch };
 }
@@ -1975,9 +1982,9 @@ function AdminDashboard() {
     data: summary,
     loading: summaryLoading,
     refetch: refetchSummary,
-  } = usePolling(() => adminApi.getDashboardSummary(), 30000);
-  const { data: trends } = usePolling(() => adminApi.getDashboardTrends("daily", 14), 60000);
-  const { data: distributions } = usePolling(() => adminApi.getDashboardDistributions(), 60000);
+  } = usePolling(() => adminApi.getDashboardSummary(), 30000, isAuthenticated);
+  const { data: trends } = usePolling(() => adminApi.getDashboardTrends("daily", 14), 60000, isAuthenticated);
+  const { data: distributions } = usePolling(() => adminApi.getDashboardDistributions(), 60000, isAuthenticated);
 
   useEffect(() => {
     if (!summary) return;
