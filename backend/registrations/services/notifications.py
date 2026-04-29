@@ -27,9 +27,11 @@ def send_registration_notifications(registration):
     else:
         whatsapp_number = ""
 
+    admin_email = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", None)
+
     admin_context = {
         "admin_link": f"{settings.FRONTEND_BASE_URL}/admin/registrations",
-        "admin_email": settings.ADMIN_NOTIFICATION_EMAIL,
+        "admin_email": admin_email or "",
         "submitted_at_display": registration.created_at.strftime("%B %d, %Y, %I:%M %p").replace(" 0", " ") if registration.created_at else "",
         "contact_tel_link": f"tel:{registration.phone}",
         "contact_whatsapp_link": f"https://wa.me/{whatsapp_number}" if whatsapp_number else "",
@@ -67,16 +69,19 @@ def send_registration_notifications(registration):
     }
 
     # Send admin notification with professional template
-    try:
-        send_templated_email(
-            subject=f"New Rider Registration Received – Yango Wing Fleet: {registration.full_name}",
-            template_name="emails/registration_admin_notification.html",
-            context=admin_context,
-            to_emails=[settings.ADMIN_NOTIFICATION_EMAIL],
-        )
-    except Exception as e:
-        logger.exception("Failed to send admin registration notification for submission %s", registration.id)
-        # Don't fail the entire registration if admin email fails
+    if admin_email:
+        try:
+            send_templated_email(
+                subject=f"New Rider Registration Received – Yango Wing Fleet: {registration.full_name}",
+                template_name="emails/registration_admin_notification.html",
+                context=admin_context,
+                to_emails=[admin_email],
+            )
+        except Exception:
+            logger.exception("Failed to send admin registration notification for submission %s", registration.id)
+            # Don't fail the entire registration if admin email fails
+    else:
+        logger.warning("ADMIN_NOTIFICATION_EMAIL not set; skipping admin registration notification for submission %s", registration.id)
 
     # Send user confirmation email (if email provided)
     if registration.email:

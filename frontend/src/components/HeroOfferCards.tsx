@@ -1,34 +1,53 @@
 /**
  * HeroOfferCards.tsx — auto-rotating offer cards driven by backend API.
- * Falls back to static offers when the API is unavailable.
+ *
+ * Render strategy:
+ *  • State is pre-seeded with rich local fallback offers → cards are visible
+ *    on the very first paint, no skeleton, no blank state.
+ *  • A subtle animated shimmer on the badge area signals "refreshing" when the
+ *    background API call is still in-flight.
+ *  • Once live data arrives it swaps in smoothly via AnimatePresence.
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, HardHat, Sparkles, ChevronLeft, ChevronRight, Tag, Loader2 } from "lucide-react";
+import {
+  HardHat,
+  Sparkles,
+  Palette,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+  BadgeCheck,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useOffers } from "@/hooks/useDynamicSections";
 import type { Offer } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/api";
 
-// ─── Colour palette for backend offers (cycles by index) ──────────────────────
+// ─── Colour palette (cycles by index) ────────────────────────────────────────
 
 const ACCENT_CLASSES = [
-  "from-[oklch(0.58_0.22_25)] to-[oklch(0.48_0.20_18)]",
-  "from-[oklch(0.78_0.14_80)] to-[oklch(0.62_0.13_70)]",
-  "from-[oklch(0.52_0.18_230)] to-[oklch(0.42_0.16_250)]",
-  "from-[oklch(0.55_0.18_160)] to-[oklch(0.45_0.16_150)]",
+  "from-[oklch(0.58_0.22_25)] to-[oklch(0.48_0.20_18)]",        // red-orange
+  "from-[oklch(0.78_0.14_80)] to-[oklch(0.62_0.13_70)]",         // gold-amber
+  "from-[oklch(0.52_0.18_230)] to-[oklch(0.42_0.16_250)]",       // blue
+  "from-[oklch(0.55_0.18_160)] to-[oklch(0.45_0.16_150)]",       // teal
 ] as const;
 
-const ICON_COMPONENTS = [Gift, HardHat, Sparkles, Tag];
+// Icon set — keyed to fallback offer IDs first, then cycles by index
+const ICON_BY_ID: Record<number, React.ElementType> = {
+  [-1]: HardHat,   // Helmet offer
+  [-2]: Zap,       // Welcome bonus
+  [-3]: Palette,   // Branding
+};
+const ICON_FALLBACK: React.ElementType[] = [Sparkles, BadgeCheck, HardHat, Zap];
 
-// ─── Map backend Offer → display card shape ───────────────────────────────────
+// ─── Display shape ────────────────────────────────────────────────────────────
 
 interface DisplayOffer {
   id: string;
   badge: string;
   title: string;
-  value: string;
   description: string;
   imageUrl: string | null;
   accentClass: string;
@@ -36,52 +55,28 @@ interface DisplayOffer {
 }
 
 function mapOffer(offer: Offer, index: number): DisplayOffer {
+  const Icon =
+    ICON_BY_ID[offer.id] ?? ICON_FALLBACK[index % ICON_FALLBACK.length];
   return {
     id: `offer-${offer.id}`,
     badge: offer.badge || "Current Offer",
     title: offer.title,
-    // Use the badge as the "value" display if no explicit value field
-    value: offer.badge || offer.title,
     description: offer.description,
     imageUrl: offer.image ? `${API_BASE_URL}${offer.image}` : null,
     accentClass: ACCENT_CLASSES[index % ACCENT_CLASSES.length],
-    Icon: ICON_COMPONENTS[index % ICON_COMPONENTS.length],
+    Icon,
   };
 }
 
-// ─── Skeleton card ─────────────────────────────────────────────────────────────
-
-function OfferCardSkeleton() {
-  return (
-    <div className="relative overflow-hidden rounded-3xl glass-strong border border-white/10 p-5 sm:p-6">
-      <div className="h-1 w-full rounded-full bg-white/10 animate-pulse" />
-      <div className="mt-4 flex items-start justify-between gap-3">
-        <div className="h-11 w-11 rounded-xl bg-white/10 animate-pulse" />
-        <div className="h-5 w-24 rounded-full bg-white/10 animate-pulse" />
-      </div>
-      <div className="mt-4 space-y-2">
-        <div className="h-8 w-32 rounded-lg bg-white/10 animate-pulse" />
-        <div className="h-5 w-48 rounded-lg bg-white/10 animate-pulse" />
-      </div>
-      <div className="mt-3 space-y-1.5">
-        <div className="h-3 w-full rounded bg-white/8 animate-pulse" />
-        <div className="h-3 w-4/5 rounded bg-white/8 animate-pulse" />
-      </div>
-      <div className="mt-5 h-10 w-full rounded-full bg-white/10 animate-pulse flex items-center justify-center">
-        <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
-      </div>
-    </div>
-  );
-}
-
-// ─── Main component ────────────────────────────────────────────────────────────
+// ─── Main component ───────────────────────────────────────────────────────────
 
 interface HeroOfferCardsProps {
   autoPlayMs?: number;
 }
 
 export function HeroOfferCards({ autoPlayMs = 4500 }: HeroOfferCardsProps) {
-  const { offers: apiOffers, loading } = useOffers();
+  // `offers` is never empty: the hook pre-seeds with rich local fallbacks.
+  const { offers: apiOffers, loading, isUsingFallback } = useOffers();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -89,20 +84,24 @@ export function HeroOfferCards({ autoPlayMs = 4500 }: HeroOfferCardsProps) {
   const count = displayOffers.length;
 
   const next = useCallback(() => setActive((p) => (p + 1) % count), [count]);
-  const prev = useCallback(() => setActive((p) => (p - 1 + count) % count), [count]);
+  const prev = useCallback(
+    () => setActive((p) => (p - 1 + count) % count),
+    [count],
+  );
 
-  // Reset active index if offers change
+  // Reset carousel when the offer list changes (fallback → live swap)
   useEffect(() => {
     setActive(0);
   }, [count]);
 
+  // Auto-play
   useEffect(() => {
     if (paused || count === 0) return;
     const id = setInterval(next, autoPlayMs);
     return () => clearInterval(id);
   }, [paused, next, autoPlayMs, count]);
 
-  if (loading) return <OfferCardSkeleton />;
+  // count is always ≥ 1 because of fallbacks, but guard just in case
   if (count === 0) return null;
 
   const offer = displayOffers[active];
@@ -126,10 +125,14 @@ export function HeroOfferCards({ autoPlayMs = 4500 }: HeroOfferCardsProps) {
           {/* Gradient top bar */}
           <div className={`h-1 w-full bg-linear-to-r ${offer.accentClass}`} />
 
-          {/* Background image (if present) */}
+          {/* Background image */}
           {offer.imageUrl && (
             <div className="absolute inset-0 -z-10">
-              <img src={offer.imageUrl} alt="" className="h-full w-full object-cover opacity-15" />
+              <img
+                src={offer.imageUrl}
+                alt=""
+                className="h-full w-full object-cover opacity-15"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/70" />
             </div>
           )}
@@ -137,20 +140,28 @@ export function HeroOfferCards({ autoPlayMs = 4500 }: HeroOfferCardsProps) {
           <div className="p-5 sm:p-6">
             {/* Header row */}
             <div className="flex items-start justify-between gap-3">
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[oklch(0.78_0.14_80_/_0.15)]`}
-              >
+              {/* Icon */}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[oklch(0.78_0.14_80_/_0.15)]">
                 <offer.Icon className="h-5 w-5 text-gold" />
               </div>
-              <span className="rounded-full glass px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+
+              {/* Badge — shimmers while the live API is fetching */}
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest
+                  ${
+                    loading && isUsingFallback
+                      ? "glass animate-pulse text-muted-foreground/60"
+                      : "glass text-muted-foreground"
+                  }`}
+              >
                 {offer.badge}
               </span>
             </div>
 
-            {/* Value + title */}
+            {/* Title */}
             <div className="mt-4">
               <div
-                className={`text-3xl sm:text-4xl font-black tracking-tight bg-linear-to-br ${offer.accentClass} bg-clip-text text-transparent`}
+                className={`text-2xl sm:text-3xl font-black tracking-tight leading-tight bg-linear-to-br ${offer.accentClass} bg-clip-text text-transparent`}
               >
                 {offer.title}
               </div>
@@ -166,13 +177,13 @@ export function HeroOfferCards({ autoPlayMs = 4500 }: HeroOfferCardsProps) {
               to="/registration"
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-transform"
             >
-              Register Now
+              Register Free Now
             </Link>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Controls */}
+      {/* Dot navigation + prev/next arrows */}
       {count > 1 && (
         <div className="mt-4 flex items-center justify-between px-1">
           <div className="flex gap-1.5">
@@ -181,7 +192,9 @@ export function HeroOfferCards({ autoPlayMs = 4500 }: HeroOfferCardsProps) {
                 key={i}
                 onClick={() => setActive(i)}
                 aria-label={`Go to offer ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === active ? "w-6 bg-gold" : "w-1.5 bg-white/20"}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === active ? "w-6 bg-gold" : "w-1.5 bg-white/20"
+                }`}
               />
             ))}
           </div>
