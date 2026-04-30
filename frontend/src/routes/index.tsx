@@ -1,11 +1,3 @@
-/**
- * routes/index.tsx — UPGRADED
- * Mobile-first, premium homepage with:
- *   • Dynamic hero offer cards (HeroOfferCards)
- *   • Earnings highlight section (EarningsHighlight)
- *   • City bonus infographic section (BonusSection)
- *   • All existing sections refined for mobile
- */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";

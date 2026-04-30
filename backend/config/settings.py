@@ -3,6 +3,7 @@ Django settings for Yango Wing Fleet (Production Ready)
 """
 
 import os
+from email.utils import formataddr, parseaddr
 from datetime import timedelta
 from pathlib import Path
 
@@ -214,7 +215,13 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 # Allow overriding the default from address from environment (Render provides this)
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+_default_from_email = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "")
+_display_name, _email_address = parseaddr(_default_from_email)
+DEFAULT_FROM_EMAIL = (
+    formataddr((_display_name or "Yango Wing Fleet", _email_address))
+    if _email_address
+    else (EMAIL_HOST_USER or "no-reply@localhost")
+)
 
 # Admin notification recipient (set in production env)
 ADMIN_NOTIFICATION_EMAIL = os.getenv("ADMIN_NOTIFICATION_EMAIL")
